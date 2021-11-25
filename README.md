@@ -14,7 +14,8 @@ The language currently supports the following operations:
 - Exponentiation ( ^ )
 
 The language is based on the following grammar:
-- Expression ::= AddSub
+
+- Expression ::= AddSub ( '\n' AddSub )*
 - AddSub ::= MulDiv ( ( '+' | '-' ) MulDiv )*
 - MulDiv ::= Exponentiation ( ( '\*' | '/' ) Exponentiation )*
 - Exponentiation ::= Atom ( '^' Atom )*
