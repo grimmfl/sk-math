@@ -31,7 +31,8 @@ class Parser:
     def _accept(self, token: Token = None):
         if token is None:
             self._current_token_idx += 1
-            self.current_token = self.tokens[self._current_token_idx]
+            if self._current_token_idx < len(self.tokens):
+                self.current_token = self.tokens[self._current_token_idx]
         else:
             if token == Token.ATOM:
                 for symbol in self.current_token:
@@ -69,7 +70,6 @@ class Parser:
             else:
                 self._accept()
                 x = expressions.Division(x, self._parse_exponentiation())
-            self._accept()
         return x
 
     def _parse_exponentiation(self) -> expressions.Expression:
@@ -89,6 +89,7 @@ class Parser:
 
 
 if __name__ == "__main__":
-    p = Parser("123 + 323*43+36")
+    p = Parser("123 + 323*43.7+36")
     print(p.tokens)
-    print(p.parse())
+    parsed: expressions.Expression = p.parse()
+    parsed.print()
