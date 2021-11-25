@@ -1,8 +1,8 @@
-from typing import List
 from string import digits
-from token import Token
-from helpers import flatten
+from typing import List
+
 import expressions
+from token import Token
 
 OPS = "*/+-^"
 
