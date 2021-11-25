@@ -7,4 +7,5 @@ class Token(Enum):
     MUL = "*"
     DIV = "/"
     EXP = "^"
+    NEWL = "\n"
     ATOM = "atom"

@@ -1,5 +1,4 @@
-from enum import Enum
-from typing import Any, Dict, List
+from typing import Any
 from token import Token
 
 

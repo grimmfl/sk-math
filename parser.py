@@ -1,6 +1,7 @@
 from typing import List
 from string import digits
 from token import Token
+from helpers import flatten
 import expressions
 
 OPS = "*/+-^"
@@ -22,7 +23,9 @@ class Parser:
             for i in range(1, len(token)):
                 last_symbol = token[i - 1]
                 current_symbol = token[i]
-                if (last_symbol in OPS and current_symbol in digits) or (last_symbol in digits and current_symbol in OPS):
+                if (last_symbol in OPS and current_symbol in digits)\
+                        or (last_symbol in digits and current_symbol in OPS)\
+                        or last_symbol == "\n" or current_symbol == "\n":
                     tokens.append(token[substr_index:i])
                     substr_index = i
             tokens.append(token[substr_index:])
@@ -47,8 +50,12 @@ class Parser:
             else:
                 raise Exception(f"Syntax Error: Expected {token} - Got {self.current_token}")
 
-    def parse(self):
-        return self._parse_add_sub()
+    def parse(self) -> expressions.Expression:
+        x: expressions.Expression = self._parse_add_sub()
+        while self.current_token == Token.NEWL.value:
+            self._accept()
+            x = expressions.Expression(x, self._parse_add_sub(), Token.NEWL)
+        return x
 
     def _parse_add_sub(self) -> expressions.Expression:
         x: expressions.Expression = self._parse_mul_div()
@@ -89,7 +96,7 @@ class Parser:
 
 
 if __name__ == "__main__":
-    p = Parser("123 + 323*43.7+36")
+    p = Parser("123 + 323*43.7+36\n 2 + 4")
     print(p.tokens)
     parsed: expressions.Expression = p.parse()
     parsed.print()
