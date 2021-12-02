@@ -11,6 +11,7 @@ Help:                   python main.py -h
 
 #### Editor
 I know it sucks but it will get better :D
+
 F10 to compile the written code
 
 ### Features
