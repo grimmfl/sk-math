@@ -37,6 +37,8 @@ class TopDownParser:
             self._current_token_idx += 1
             if self._current_token_idx < len(self.tokens):
                 self.current_token = self.tokens[self._current_token_idx]
+            else:
+                self.current_token = None
         else:
             if token == Token.CONST:
                 for symbol in self.current_token:
@@ -59,8 +61,9 @@ class TopDownParser:
         statements = [self._parse_statement()]
         while self.current_token == Token.NEWL.value:
             self._accept()
-            statements.append(self._parse_statement())
-        if self._current_token_idx != len(self.tokens):
+            if self.current_token != Token.NEWL.value and self.current_token is not None:
+                statements.append(self._parse_statement())
+        if self.current_token is not None:
             raise SyntaxError(f"Expected newline or EOF - Got '{self.current_token}'")
         return ParsedElement(statements, None, ParsedType.STATEMENTS)
 
