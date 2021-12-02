@@ -41,15 +41,15 @@ class TopDownParser:
             if token == Token.CONST:
                 for symbol in self.current_token:
                     if symbol not in digits + ".":
-                        raise SyntaxError(f"Syntax Error: Invalid symbol '{symbol}' Atom")
+                        raise SyntaxError(f"Invalid symbol '{symbol}' Atom")
                 if self.current_token.count(".") > 1:
-                    raise SyntaxError(f"Syntax Error: Atom may only contain one '.'")
+                    raise SyntaxError(f"Atom may only contain one '.'")
                 else:
                     self._accept()
             elif self.current_token == token.value:
                 self._accept()
             else:
-                raise SyntaxError(f"Syntax Error: Expected {token} - Got {self.current_token}")
+                raise SyntaxError(f"Expected {token} - Got '{self.current_token}'")
 
     def parse(self, text: str) -> ParsedElement:
         self.tokens = self._scan(text)
@@ -60,6 +60,8 @@ class TopDownParser:
         while self.current_token == Token.NEWL.value:
             self._accept()
             statements.append(self._parse_statement())
+        if self._current_token_idx != len(self.tokens):
+            raise SyntaxError(f"Expected newline or EOF - Got '{self.current_token}'")
         return ParsedElement(statements, None, ParsedType.STATEMENTS)
 
     def _parse_statement(self) -> ParsedElement:

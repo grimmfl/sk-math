@@ -1,8 +1,11 @@
 import sys
+import os
 from string import digits
 from typing import Dict
+
 from compiler.executer import Executer
 from compiler.top_down_parser import TopDownParser
+from editor import Editor
 
 VALID_INPUTS = digits + "*/+-^. "
 
@@ -46,18 +49,13 @@ if __name__ == "__main__":
             if not(c["-f"].endswith(".skm")):
                 raise Exception("File needs to have .skm ending.")
             code = file_to_text(c["-f"])
+            run(code, p, e)
     else:
-        p = TopDownParser()
-        code = "var x, y, z\n" \
-               "x = 4\n" \
-               "y = 8\n" \
-               "z = x * y + 8\n" \
-               "out z"
-        #editor = Editor()
-        #code: str = ""
-        #line_number = 1
-        #while True:
-        #    code += input(f"{line_number}  ") + "\n"
-        #    line_number += 1
-
-    run(code, p, e)
+        while True:
+            editor = Editor()
+            code = editor.text
+            os.system("cls")
+            print(code)
+            print("\n>> ", end="")
+            run(code, p, e)
+            input("\nEnter    Write new code")
