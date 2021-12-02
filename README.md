@@ -4,19 +4,31 @@ A simple WIP math language with its own compiler written in Python.
 
 ### Features
 
-The compiler is not finished yet. Only the Parser is implemented.
-
 The language currently supports the following operations:
 - Addition ( + )
 - Subtraction ( - )
 - Multiplication ( * )
 - Division ( / )
 - Exponentiation ( ^ )
+- Variable Declaration: var x, y, z
+- Variable Assignments: x = 4 * y + z
+- Outputs: out x + 4
+
+A new line starts a new command.
+
+Parantheses are not supported yet.
+
+I use a simple Top-Down-Parser, so left recursion is not supported.
 
 The language is based on the following grammar:
 
-- Expression ::= AddSub ( '\n' AddSub )*
+- Language ::= Statement ( '\n' Statement )*
+- Statement ::= VarDecl | VarAssign | Out
+- VarDecl ::= var ID (',' ID)*
+- VarAssign ::= ID '=' Expr
+- Out ::= 'out' Expr
+- Expr ::= AddSub ( '\n' AddSub )*
 - AddSub ::= MulDiv ( ( '+' | '-' ) MulDiv )*
 - MulDiv ::= Exponentiation ( ( '\*' | '/' ) Exponentiation )*
 - Exponentiation ::= Atom ( '^' Atom )*
-- Atom ::= INT | FLOAT
+- Atom ::= INT | FLOAT | ID
