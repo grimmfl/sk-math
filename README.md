@@ -30,6 +30,8 @@ A new line starts a new command.
 
 Parantheses are not supported yet.
 
+### Grammar (CFG)
+
 I use a simple Top-Down-Parser, so left recursion is not supported.
 
 The language is based on the following grammar:
