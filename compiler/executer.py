@@ -1,6 +1,6 @@
 from typing import List
 
-from elements import ParsedElement, ParsedType
+from compiler.elements import ParsedElement, ParsedType
 from helpers import Stack
 from typing import Dict
 

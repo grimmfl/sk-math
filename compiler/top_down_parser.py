@@ -1,8 +1,8 @@
-from string import digits, ascii_letters
+from string import digits
 from typing import List
 
-from elements import ParsedElement, ParsedType
-from tokens import Token
+from compiler.elements import ParsedElement, ParsedType
+from compiler.tokens import Token
 
 OPS = ["*", "/", "+", "-", "^", ",", "var", "out", "="]
 

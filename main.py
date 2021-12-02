@@ -1,9 +1,8 @@
 import sys
 from string import digits
 from typing import Dict
-from editor import Editor
-from executer import Executer
-from top_down_parser import TopDownParser
+from compiler.executer import Executer
+from compiler.top_down_parser import TopDownParser
 
 VALID_INPUTS = digits + "*/+-^. "
 
