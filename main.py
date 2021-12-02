@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 from string import digits
 from typing import Dict
 
@@ -18,10 +18,10 @@ def show_help():
 def config() -> Dict:
     switch = {
         "-f": None,
-        "-h": show_help
+        "-h": show_help,
     }
     for i in range(1, len(sys.argv)):
-        if sys.argv[i].startswith("-"):
+        if sys.argv[i] in switch.keys():
             if switch[sys.argv[i]] is None:
                 switch[sys.argv[i]] = sys.argv[i + 1]
             else:
@@ -40,16 +40,16 @@ def run(text: str, parser: TopDownParser, executer: Executer):
 
 
 if __name__ == "__main__":
+    if "--dev" not in sys.argv:
+        sys.tracebacklimit = 0
     p = TopDownParser()
     e = Executer()
-    if len(sys.argv) > 1:
-        c: Dict = config()
-        code = ""
-        if c["-f"] is not None:
-            if not(c["-f"].endswith(".skm")):
-                raise Exception("File needs to have .skm ending.")
-            code = file_to_text(c["-f"])
-            run(code, p, e)
+    c: Dict = config()
+    if c["-f"] is not None:
+        if not(c["-f"].endswith(".skm")):
+            raise Exception("File needs to have .skm ending.")
+        code = file_to_text(c["-f"])
+        run(code, p, e)
     else:
         while True:
             editor = Editor()

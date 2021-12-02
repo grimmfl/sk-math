@@ -1,8 +1,9 @@
 from string import digits
-from typing import List
+from typing import List, Tuple
 
 from compiler.elements import ParsedElement, ParsedType
 from compiler.tokens import Token
+from helpers import Stack
 
 OPS = ["*", "/", "+", "-", "^", ",", "var", "out", "="]
 
@@ -11,8 +12,10 @@ class TopDownParser:
     def __init__(self):
         self.text: str = ""
         self.tokens: List[str] = []
+        self.locations: List[Tuple[int, int]] = []
         self._current_token_idx = -1
         self.current_token = None
+        self.current_location = None
 
     @staticmethod
     def _scan(text: str) -> List[str]:
@@ -32,31 +35,55 @@ class TopDownParser:
             tokens.append(token[substr_index:])
         return tokens
 
+    def _get_locations(self):
+        stack = Stack()
+        for token in reversed(self.tokens):
+            stack.push(token)
+        i = 0
+        row = 0
+        col = 0
+        while i < len(self.text):
+            if self.text[i:].startswith(stack.peak()):
+                token = stack.pop()
+                self.locations.append((row, col))
+                if token == "\n":
+                    row += 1
+                    col = 0
+                else:
+                    col += len(token)
+                i += len(token)
+            else:
+                i += 1
+
     def _accept(self, token: Token = None):
         if token is None:
             self._current_token_idx += 1
             if self._current_token_idx < len(self.tokens):
                 self.current_token = self.tokens[self._current_token_idx]
+                self.current_location = self.locations[self._current_token_idx]
             else:
                 self.current_token = None
         else:
             if token == Token.CONST:
                 for symbol in self.current_token:
                     if symbol not in digits + ".":
-                        raise SyntaxError(f"Invalid symbol '{symbol}' Atom")
+                        raise SyntaxError(f"Invalid symbol '{symbol}' Atom at {self.current_location}")
                 if self.current_token.count(".") > 1:
-                    raise SyntaxError(f"Atom may only contain one '.'")
+                    raise SyntaxError(f"Atom may only contain one '.' at {self.current_location}")
                 else:
                     self._accept()
             elif self.current_token == token.value:
                 self._accept()
             else:
-                raise SyntaxError(f"Expected {token} - Got '{self.current_token}'")
+                raise SyntaxError(f"Expected {token} - Got '{self.current_token}' at {self.current_location}")
 
     def parse(self, text: str) -> ParsedElement:
+        self.text = text
         self.tokens = self._scan(text)
+        self._get_locations()
         self._current_token_idx = 0
         self.current_token = self.tokens[self._current_token_idx]
+        self.current_location = self.locations[self._current_token_idx]
 
         statements = [self._parse_statement()]
         while self.current_token == Token.NEWL.value:
@@ -64,7 +91,7 @@ class TopDownParser:
             if self.current_token != Token.NEWL.value and self.current_token is not None:
                 statements.append(self._parse_statement())
         if self.current_token is not None:
-            raise SyntaxError(f"Expected newline or EOF - Got '{self.current_token}'")
+            raise SyntaxError(f"Expected newline or EOF - Got '{self.current_token}' at {self.current_location}")
         return ParsedElement(statements, None, ParsedType.STATEMENTS)
 
     def _parse_statement(self) -> ParsedElement:
