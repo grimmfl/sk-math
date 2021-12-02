@@ -4,7 +4,7 @@ A simple WIP math language with its own compiler written in Python.
 
 ### Usage
 
-python main.py -f <FILENAME>
+python main.py -f \<FILENAME\>
 
 Currently, you can only compile scripts from a file. I am working on an editor. 
 
