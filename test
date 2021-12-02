@@ -1,0 +1,5 @@
+var x, y, z
+x = 4
+y = 2
+z = 6
+out x ^ y - z

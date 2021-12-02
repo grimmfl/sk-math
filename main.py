@@ -1,16 +1,62 @@
-# This is a sample Python script.
+import sys
+from string import digits
+from typing import Dict
+from editor import Editor
+from executer import Executer
+from top_down_parser import TopDownParser
 
-# Press Umschalt+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+VALID_INPUTS = digits + "*/+-^. "
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Strg+F8 to toggle the breakpoint.
+def show_help():
+    print("-f <FILEPATH> | Execute file")
+    print("-h            | Help")
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+def config() -> Dict:
+    switch = {
+        "-f": None,
+        "-h": show_help
+    }
+    for i in range(1, len(sys.argv)):
+        if sys.argv[i].startswith("-"):
+            if switch[sys.argv[i]] is None:
+                switch[sys.argv[i]] = sys.argv[i + 1]
+            else:
+                switch[sys.argv[i]]()
+    return switch
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+def file_to_text(path: str) -> str:
+    with open(path, "r") as file:
+        return file.read()
+
+
+def run(text: str, parser: TopDownParser, executer: Executer):
+    parsed = parser.parse(text)
+    executer.execute(parsed)
+
+
+if __name__ == "__main__":
+    p = TopDownParser()
+    e = Executer()
+    if len(sys.argv) > 1:
+        c: Dict = config()
+        code = ""
+        if c["-f"] is not None:
+            code = file_to_text(c["-f"])
+    else:
+        p = TopDownParser()
+        code = "var x, y, z\n" \
+               "x = 4\n" \
+               "y = 8\n" \
+               "z = x * y + 8\n" \
+               "out z"
+        #editor = Editor()
+        #code: str = ""
+        #line_number = 1
+        #while True:
+        #    code += input(f"{line_number}  ") + "\n"
+        #    line_number += 1
+
+    run(code, p, e)
