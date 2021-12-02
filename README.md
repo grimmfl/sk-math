@@ -3,10 +3,15 @@
 A simple WIP math language with its own compiler written in Python.
 
 ### Usage
+Write code in editor:   python main.py
 
-python main.py -f \<FILENAME\>
+Compile code from file: python main.py -f \<FILENAME\>
 
-Currently, you can only compile scripts from a file. I am working on an editor. 
+Help:                   python main.py -h
+
+#### Editor
+I know it sucks but it will get better :D
+F10 to compile the written code
 
 ### Features
 
