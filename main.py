@@ -44,6 +44,8 @@ if __name__ == "__main__":
         c: Dict = config()
         code = ""
         if c["-f"] is not None:
+            if not(c["-f"].endswith(".skm")):
+                raise Exception("File needs to have .skm ending.")
             code = file_to_text(c["-f"])
     else:
         p = TopDownParser()
