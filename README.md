@@ -37,7 +37,13 @@ I use a simple Top-Down-Parser, so left recursion is not supported.
 The language is based on the following grammar:
 
 - Language ::= Statement ( '\n' Statement )*
-- Statement ::= VarDecl | VarAssign | Out
+- Statement ::= SimpleStatement | FuncDefinition
+- FuncDefinition ::= 'func' ID '(' FuncParams ')' '{' FuncBody '}'
+- FuncCall ::= ID '(' FuncParams ')'
+- FuncParams ::= Ɛ | (ID (',' ID)*)
+- FuncBody ::= ('\n' SimpleStatement)* '\n' ReturnStatement '\n'
+- ReturnStatement ::= 'return' Expr
+- SimpleStatement ::= VarDecl | VarAssign | Out | FuncCall
 - VarDecl ::= var ID (',' ID)*
 - VarAssign ::= ID '=' Expr
 - Out ::= 'out' Expr
@@ -45,4 +51,4 @@ The language is based on the following grammar:
 - AddSub ::= MulDiv ( ( '+' | '-' ) MulDiv )*
 - MulDiv ::= Exponentiation ( ( '\*' | '/' ) Exponentiation )*
 - Exponentiation ::= Atom ( '^' Atom )*
-- Atom ::= INT | FLOAT | ID
+- Atom ::= INT | FLOAT | ID | FuncCall
