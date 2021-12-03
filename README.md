@@ -43,7 +43,7 @@ The language is based on the following grammar:
 - FuncParams ::= Ɛ | (ID (',' ID)*)
 - FuncBody ::= ('\n' SimpleStatement)* '\n' ReturnStatement '\n'
 - ReturnStatement ::= 'return' Expr
-- SimpleStatement ::= VarDecl | VarAssign | Out | FuncCall
+- SimpleStatement ::= VarDecl | VarAssign | Out
 - VarDecl ::= var ID (',' ID)*
 - VarAssign ::= ID '=' Expr
 - Out ::= 'out' Expr
