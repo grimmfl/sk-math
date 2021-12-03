@@ -93,7 +93,7 @@ Outputs always need to be an expression.
 
 ## Grammar (CFG)
 
-I use a simple Top-Down-Parser, so left recursion is not supported.
+I use a simple LL(2) Top-Down-Parser.
 
 The language is based on the following grammar:
 
