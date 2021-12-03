@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Any
 
+
 class ParsedType(Enum):
     STATEMENTS = "statements"
     VAR_DECLARATION = "var_declaration"
@@ -13,6 +14,12 @@ class ParsedType(Enum):
     EXPONENTIATION = "exponentiation"
     IDENTIFIER = "identifier"
     CONST = "const"
+    FUNC_DEFINITION = "func_definition"
+    FUNC_INFO = "func_info"
+    FUNC_PARAMS = "func_params"
+    FUNC_BODY = "func_body"
+    FUNC_CALL = "func_call"
+    FUNC_CALL_PARAMS = "func_call_params"
 
 
 class ParsedElement:

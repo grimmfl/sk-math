@@ -5,7 +5,7 @@ from compiler.elements import ParsedElement, ParsedType
 from compiler.tokens import Token
 from helpers import Stack
 
-OPS = ["*", "/", "+", "-", "^", ",", "var", "out", "="]
+OPS = ["*", "/", "+", "-", "^", ",", "var", "out", "=", "(", ")", "{", "}", "return", "func"]
 
 
 class TopDownParser:
@@ -15,6 +15,7 @@ class TopDownParser:
         self.locations: List[Tuple[int, int]] = []
         self._current_token_idx = -1
         self.current_token = None
+        self.next_token = None
         self.current_location = None
 
     @staticmethod
@@ -33,7 +34,7 @@ class TopDownParser:
                     tokens.append(token[substr_index:i])
                     substr_index = i
             tokens.append(token[substr_index:])
-        return tokens
+        return [token for token in filter(lambda tok: tok != "", tokens)]
 
     def _get_locations(self):
         stack = Stack()
@@ -61,6 +62,8 @@ class TopDownParser:
             if self._current_token_idx < len(self.tokens):
                 self.current_token = self.tokens[self._current_token_idx]
                 self.current_location = self.locations[self._current_token_idx]
+                if self._current_token_idx < len(self.tokens) - 1:
+                    self.next_token = self.tokens[self._current_token_idx + 1]
             else:
                 self.current_token = None
         else:
@@ -95,6 +98,49 @@ class TopDownParser:
         return ParsedElement(statements, None, ParsedType.STATEMENTS)
 
     def _parse_statement(self) -> ParsedElement:
+        if self.current_token == Token.FUNC.value:
+            return self._parse_func_definition()
+        else:
+            return self._parse_simple_statement()
+
+    def _parse_func_definition(self) -> ParsedElement:
+        self._accept(Token.FUNC)
+        identifier = self._parse_identifier()
+        self._accept(Token.LPARAN)
+        params = self._parse_func_params()
+        self._accept(Token.RPARAN)
+        self._accept(Token.LBRACE)
+        body = self._parse_func_body()
+        self._accept(Token.RBRACE)
+        info = ParsedElement(params, body, ParsedType.FUNC_INFO)
+        return ParsedElement(identifier, info, ParsedType.FUNC_DEFINITION)
+
+    def _parse_func_params(self) -> ParsedElement:
+        params = []
+        if self.current_token != Token.RPARAN.value:
+            params = [self._parse_identifier()]
+            while self.current_token == Token.COM.value:
+                self._accept()
+                params.append(self._parse_identifier())
+        return ParsedElement(params, None, ParsedType.FUNC_PARAMS)
+
+    def _parse_func_body(self) -> ParsedElement:
+        statements = []
+        while self.next_token != Token.RETURN.value:
+            if self.next_token == Token.RBRACE.value:
+                self._accept(Token.RETURN)
+            self._accept(Token.NEWL)
+            statements.append(self._parse_simple_statement())
+        self._accept(Token.NEWL)
+        statements.append(self._parse_return_statement())
+        self._accept(Token.NEWL)
+        return ParsedElement(statements, None, ParsedType.FUNC_BODY)
+
+    def _parse_return_statement(self) -> ParsedElement:
+        self._accept(Token.RETURN)
+        return self._parse_add_sub()
+
+    def _parse_simple_statement(self) -> ParsedElement:
         if self.current_token == Token.VAR.value:
             return self._parse_var_declaration()
         elif self.current_token == Token.OUT.value:
@@ -151,10 +197,29 @@ class TopDownParser:
         return x
 
     def _parse_atom(self) -> ParsedElement:
-        for i in range(0, 10):
-            if self.current_token.startswith(str(i)):
-                return self._parse_const()
-        return self._parse_identifier()
+        if self.next_token == Token.LPARAN.value:
+            return self._parse_func_call()
+        else:
+            for i in range(0, 10):
+                if self.current_token.startswith(str(i)):
+                    return self._parse_const()
+            return self._parse_identifier()
+
+    def _parse_func_call(self):
+        identifier = self._parse_identifier()
+        self._accept(Token.LPARAN)
+        params = self._parse_func_call_params()
+        self._accept(Token.RPARAN)
+        return ParsedElement(identifier, params, ParsedType.FUNC_CALL)
+
+    def _parse_func_call_params(self) -> ParsedElement:
+        params = []
+        if self.current_token != Token.RPARAN.value:
+            params.append(self._parse_atom())
+            while self.current_token == Token.COM.value:
+                self._accept()
+                params.append(self._parse_atom())
+        return ParsedElement(params, None, ParsedType.FUNC_CALL_PARAMS)
 
     def _parse_identifier(self):
         x = ParsedElement(self.current_token, None, ParsedType.IDENTIFIER)
@@ -168,3 +233,11 @@ class TopDownParser:
             x = ParsedElement(int(self.current_token), 0, ParsedType.CONST)
         self._accept(Token.CONST)
         return x
+
+
+if __name__ == "__main__":
+    p = TopDownParser()
+    t = "func mul(x, y) {\nreturn x * y\n}\nvar z\nz = mul(3, 4)\nout z"
+    parsed = p.parse(t)
+    print(p.tokens)
+    parsed.print()
