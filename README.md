@@ -28,6 +28,27 @@ The language currently supports the following operations:
 
 ## Documentation
 
+#### Statements
+Statements build the base structure of your code.
+
+A statement can be one of the following:
+- Variable Declaration / Assignment
+- Function Declaration
+- Output
+
+A new line ends a statement and starts a new one
+
+#### Expressions
+An expression can be one of the following:
+- ```5``` Constant
+- ```x``` Variable
+- ```foo(x, 1)``` Function Call
+- ```5 * x + foo(x, 1) ^ 2``` Arithmetic Expression
+
+Precedences for arithmetic expression follow the basic mathematical rules.
+
+Parantheses are not supported yet.
+
 #### Variable Declaration
 - Single Variable Declaration: ```var x```
 - Multiple Variable Declaration: ```var x, y, z```
@@ -38,7 +59,9 @@ Variables can not be declared more than once in a scope.
 - Constant Assignment: ```x = 5```
 - Variable Assignment: ```y = 3 * x + 4.6```
 
-Variables need to be declared because a value can be assigned to them
+Variables need to be declared because a value can be assigned to them.
+
+The assigned value has to be an expression.
 
 #### Function Definition
 ```
@@ -47,14 +70,19 @@ func foo(x, y, z) {
   return a * z
 }
 ```
-- Functions start a new scope.
-- Functions always need to have a return statement as the last statement.
-- Newlines are mandatory after the opening and before the closing brace.
+
+Functions start a new scope.
+
+Functions always need to have a return statement as the last statement.
+
+Newlines are mandatory after the opening and before the closing brace.
 
 #### Function Calls
 ```x = foo(1, y, 3) + z```
-- A function call is not a statement. It always has to be used as an expression.
-- The actual parameters need to be either constants or variable identifiers. You can not use an expression as a parameter.
+
+A function call is not a statement. It always has to be used as an expression.
+
+The actual parameters need to be either constants or variable identifiers. You can not use an expression as a parameter.
 
 #### Outputs
 ```out 5```
@@ -62,10 +90,6 @@ func foo(x, y, z) {
 ```out 7 + bar(1) * a```
 
 Outputs always need to be an expression.
-
-A new line starts a new command.
-
-Parantheses are not supported yet.
 
 ## Grammar (CFG)
 
