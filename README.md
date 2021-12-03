@@ -49,5 +49,5 @@ The language is based on the following grammar:
 - Expr ::= AddSub ( '\n' AddSub )*
 - AddSub ::= MulDiv ( ( '+' | '-' ) MulDiv )*
 - MulDiv ::= Exponentiation ( ( '\*' | '/' ) Exponentiation )*
-- Exponentiation ::= (Atom | FuncCall) ( '^' (Atom | FuncCall) )*
-- Atom ::= INT | FLOAT | ID
+- Exponentiation ::= Atom ( '^' Atom )*
+- Atom ::= INT | FLOAT | ID | FuncCall
