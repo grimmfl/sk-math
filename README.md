@@ -59,7 +59,7 @@ Variables can not be declared more than once in a scope.
 - Constant Assignment: ```x = 5```
 - Variable Assignment: ```y = 3 * x + 4.6```
 
-Variables need to be declared because a value can be assigned to them.
+Variables need to be declared before a value can be assigned to them.
 
 The assigned value has to be an expression.
 
