@@ -102,9 +102,9 @@ The language is based on the following grammar:
 - FuncDefinition ::= 'func' ('void' | Type) ID '(' FuncParams ')' '{' FuncBody '}'
 - FuncCall ::= ID '(' FuncParams ')'
 - FuncParams ::= Ɛ | (Type ID (',' Type ID)*)
-- FuncBody ::= ('\n' SimpleStatement)* '\n' (SimpleStatement | ReturnStatement) '\n'
+- FuncBody ::= ('\n' SimpleStatement)* '\n' (SimpleStatement) '\n'
+- SimpleStatement ::= VarDecl | VarAssign | Out | FuncCall | ReturnStatement
 - ReturnStatement ::= 'return' Expr
-- SimpleStatement ::= VarDecl | VarAssign | Out | FuncCall
 - VarDecl ::= Type ID (',' ID)*
 - VarAssign ::= ID '=' Expr
 - Out ::= 'out' Expr
