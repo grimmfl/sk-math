@@ -104,7 +104,7 @@ The language is based on the following grammar:
 - FuncParams ::= Ɛ | (Type ID (',' Type ID)*)
 - FuncBody ::= ('\n' SimpleStatement)* '\n' (SimpleStatement | ReturnStatement) '\n'
 - ReturnStatement ::= 'return' Expr
-- SimpleStatement ::= VarDecl | VarAssign | Out
+- SimpleStatement ::= VarDecl | VarAssign | Out | FuncCall
 - VarDecl ::= Type ID (',' ID)*
 - VarAssign ::= ID '=' Expr
 - Out ::= 'out' Expr
