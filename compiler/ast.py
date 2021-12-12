@@ -1,8 +1,8 @@
 from enum import Enum
-from typing import Any
+from typing import Any, Tuple
 
 
-class ParsedType(Enum):
+class NodeName(Enum):
     STATEMENTS = "statements"
     VAR_DECLARATION = "var_declaration"
     VAR_ASSIGNMENT = "var_assignment"
@@ -22,11 +22,11 @@ class ParsedType(Enum):
     FUNC_CALL_PARAMS = "func_call_params"
 
 
-class ParsedElement:
-    def __init__(self, a: Any, b: Any, parsed_type: ParsedType):
+class AstNode:
+    def __init__(self, a: Any, b: Any, name: NodeName, location: Tuple[int, int]):
         self.a = a
         self.b = b
-        self.parsed_type = parsed_type
+        self.name = name
 
     @staticmethod
     def _print_rec(element, depth: int = 0):
@@ -36,13 +36,13 @@ class ParsedElement:
             if type(element) == float or type(element) == int or type(element) == str:
                 print(element)
             else:
-                print(element.parsed_type)
+                print(element.name)
                 if type(element.a) == list:
                     for item in element.a:
-                        ParsedElement._print_rec(item, depth + 1)
+                        AstNode._print_rec(item, depth + 1)
                 else:
-                    ParsedElement._print_rec(element.a, depth + 1)
-                ParsedElement._print_rec(element.b, depth + 1)
+                    AstNode._print_rec(element.a, depth + 1)
+                AstNode._print_rec(element.b, depth + 1)
 
     def print(self):
         self._print_rec(self, 0)
