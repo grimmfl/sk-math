@@ -1,8 +1,9 @@
 from string import digits
 from typing import List, Tuple
 
-from compiler.ast import AstNode, NodeName
+from compiler.ast import *
 from compiler.tokens import Token
+from compiler.errors import SyntaxError
 from helpers import Stack
 
 OPS = ["*", "/", "+", "-", "^", ",", "var", "out", "=", "(", ")", "{", "}", "return", "func"]
@@ -67,18 +68,10 @@ class TopDownParser:
             else:
                 self.current_token = None
         else:
-            if token == Token.CONST:
-                for symbol in self.current_token:
-                    if symbol not in digits + ".":
-                        raise SyntaxError(f"Invalid symbol '{symbol}' Atom at {self.current_location}")
-                if self.current_token.count(".") > 1:
-                    raise SyntaxError(f"Atom may only contain one '.' at {self.current_location}")
-                else:
-                    self._accept()
-            elif self.current_token == token.value:
+            if self.current_token == token.value:
                 self._accept()
             else:
-                raise SyntaxError(f"Expected {token} - Got '{self.current_token}' at {self.current_location}")
+                raise SyntaxError(token, self.current_token, self.current_location)
 
     def parse(self, text: str) -> AstNode:
         self.text = text
@@ -94,148 +87,16 @@ class TopDownParser:
             if self.current_token != Token.NEWL.value and self.current_token is not None:
                 statements.append(self._parse_statement())
         if self.current_token is not None:
-            raise SyntaxError(f"Expected newline or EOF - Got '{self.current_token}' at {self.current_location}")
-        return AstNode(statements, None, NodeName.STATEMENTS)
+            raise SyntaxError(Token.NEWL, self.current_token, self.current_location)
+        return Module(statements, location=(0, 0))
 
-    def _parse_statement(self) -> AstNode:
+    def _parse_statement(self) -> Statement:
         if self.current_token == Token.FUNC.value:
             return self._parse_func_definition()
         else:
             return self._parse_simple_statement()
 
-    def _parse_func_definition(self) -> AstNode:
-        start = self.current_location
-        self._accept(Token.FUNC)
-        identifier = self._parse_identifier()
-        self._accept(Token.LPARAN)
-        location = self.current_location
-        params = self._parse_func_params()
-        self._accept(Token.RPARAN)
-        self._accept(Token.LBRACE)
-        body = self._parse_func_body()
-        self._accept(Token.RBRACE)
-        info = AstNode(params, body, NodeName.FUNC_INFO, location)
-        return AstNode(identifier, info, NodeName.FUNC_DEFINITION, start)
-
-    def _parse_func_params(self) -> AstNode:
-        params = []
-        location = self.current_location
-        if self.current_token != Token.RPARAN.value:
-            params = [self._parse_identifier()]
-            while self.current_token == Token.COM.value:
-                self._accept()
-                params.append(self._parse_identifier())
-        return AstNode(params, None, NodeName.FUNC_PARAMS, location)
-
-    def _parse_func_body(self) -> AstNode:
-        statements = []
-        while self.next_token != Token.RETURN.value:
-            if self.next_token == Token.RBRACE.value:
-                self._accept(Token.RETURN)
-            self._accept(Token.NEWL)
-            statements.append(self._parse_simple_statement())
-        self._accept(Token.NEWL)
-        statements.append(self._parse_return_statement())
-        self._accept(Token.NEWL)
-        return AstNode(statements, None, NodeName.FUNC_BODY)
-
-    def _parse_return_statement(self) -> AstNode:
-        self._accept(Token.RETURN)
-        return self._parse_add_sub()
-
-    def _parse_simple_statement(self) -> AstNode:
-        if self.current_token == Token.VAR.value:
-            return self._parse_var_declaration()
-        elif self.current_token == Token.OUT.value:
-            return self._parse_out_statement()
-        else:
-            return self._parse_var_assignment()
-
-    def _parse_var_declaration(self) -> AstNode:
-        self._accept(Token.VAR)
-        identifiers = [self._parse_identifier()]
-        while self.current_token == Token.COM.value:
-            self._accept()
-            identifiers.append(self._parse_identifier())
-        return AstNode(identifiers, None, NodeName.VAR_DECLARATION)
-
-    def _parse_out_statement(self) -> AstNode:
-        self._accept(Token.OUT)
-        x = self._parse_add_sub()
-        return AstNode(x, None, NodeName.OUT_STATEMENT)
-
-    def _parse_var_assignment(self) -> AstNode:
-        identifier = self._parse_identifier()
-        self._accept(Token.ASSIGN)
-        expr = self._parse_add_sub()
-        return AstNode(identifier, expr, NodeName.VAR_ASSIGNMENT)
-
-    def _parse_add_sub(self) -> AstNode:
-        x: AstNode = self._parse_mul_div()
-        while self.current_token == Token.ADD.value or self.current_token == Token.SUB.value:
-            if self.current_token == Token.ADD.value:
-                self._accept()
-                x = AstNode(x, self._parse_mul_div(), NodeName.ADDITION)
-            else:
-                self._accept()
-                x = AstNode(x, self._parse_mul_div(), NodeName.SUBTRACTION)
-        return x
-
-    def _parse_mul_div(self) -> AstNode:
-        x: AstNode = self._parse_exponentiation()
-        while self.current_token == Token.MUL.value or self.current_token == Token.DIV.value:
-            if self.current_token == Token.MUL.value:
-                self._accept()
-                x = AstNode(x, self._parse_exponentiation(), NodeName.MULTIPLICATION)
-            else:
-                self._accept()
-                x = AstNode(x, self._parse_exponentiation(), NodeName.DIVISION)
-        return x
-
-    def _parse_exponentiation(self) -> AstNode:
-        x: AstNode = self._parse_atom()
-        while self.current_token == Token.EXP.value:
-            self._accept()
-            x = AstNode(x, self._parse_atom(), NodeName.EXPONENTIATION)
-        return x
-
-    def _parse_atom(self) -> AstNode:
-        if self.next_token == Token.LPARAN.value:
-            return self._parse_func_call()
-        else:
-            for i in range(0, 10):
-                if self.current_token.startswith(str(i)):
-                    return self._parse_const()
-            return self._parse_identifier()
-
-    def _parse_func_call(self):
-        identifier = self._parse_identifier()
-        self._accept(Token.LPARAN)
-        params = self._parse_func_call_params()
-        self._accept(Token.RPARAN)
-        return AstNode(identifier, params, NodeName.FUNC_CALL)
-
-    def _parse_func_call_params(self) -> AstNode:
-        params = []
-        if self.current_token != Token.RPARAN.value:
-            params.append(self._parse_atom())
-            while self.current_token == Token.COM.value:
-                self._accept()
-                params.append(self._parse_atom())
-        return AstNode(params, None, NodeName.FUNC_CALL_PARAMS)
-
-    def _parse_identifier(self):
-        x = AstNode(self.current_token, None, NodeName.IDENTIFIER)
-        self._accept()
-        return x
-
-    def _parse_const(self) -> AstNode:
-        if "." in self.current_token:
-            x = AstNode(float(self.current_token), 1, NodeName.CONST)
-        else:
-            x = AstNode(int(self.current_token), 0, NodeName.CONST)
-        self._accept(Token.CONST)
-        return x
+    def _parse_func_definition(self) -> FunctionDefinition:
 
 
 if __name__ == "__main__":
