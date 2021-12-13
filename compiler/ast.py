@@ -115,11 +115,39 @@ class Constant(Expression):
         super().__init__(location)
 
 
+class FormalParameter(AstNode):
+    def __init__(self, type: Type, identifier: str, location: Tuple[int, int]):
+        self.type: Type = type
+        self.identifier: str = identifier
+        super().__init__(location)
+
+
+class FunctionDefinition(Statement):
+    def __init__(self, name: str, return_type: ReturnType, formal_parameters: List[FormalParameter], body: List[SimpleStatement],
+                 location: Tuple[int, int]):
+        self.name: str = name
+        self.return_type: ReturnType = return_type
+        self.formal_parameters: List[FormalParameter] = formal_parameters
+        self.body: List[Statement] = body
+        super().__init__(location)
+
+
 class CallExpression(Expression):
     def __init__(self, name: str, actual_parameters: List[Expression], location: Tuple[int, int]):
         self.name: str = name
         self.actual_parameters: List[Expression] = actual_parameters
         super().__init__(location)
+
+        self._function_definition: FunctionDefinition = None
+
+    def is__function_definition_set(self) -> bool:
+        return self._function_definition is None
+
+    def get_function_definition(self) -> FunctionDefinition:
+        return self._function_definition
+
+    def set_function_definition(self, definition: FunctionDefinition):
+        self._function_definition = definition
 
 
 class SimpleStatement(Statement):
@@ -156,21 +184,4 @@ class FunctionCall(SimpleStatement):
 class ReturnStatement(SimpleStatement):
     def __init__(self, expression: Expression, location: Tuple[int, int]):
         self.expression: Expression = expression
-        super().__init__(location)
-
-
-class FormalParameter(AstNode):
-    def __init__(self, type: Type, identifier: str, location: Tuple[int, int]):
-        self.type: Type = type
-        self.identifier: str = identifier
-        super().__init__(location)
-
-
-class FunctionDefinition(Statement):
-    def __init__(self, name: str, return_type: ReturnType, formal_parameters: List[FormalParameter], body: List[SimpleStatement],
-                 location: Tuple[int, int]):
-        self.name: str = name
-        self.return_type: ReturnType = return_type
-        self.formal_parameters: List[FormalParameter] = formal_parameters
-        self.body: List[Statement] = body
         super().__init__(location)

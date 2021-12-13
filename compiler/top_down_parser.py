@@ -92,11 +92,21 @@ class TopDownParser:
 
     def _parse_statement(self) -> Statement:
         if self.current_token == Token.FUNC.value:
-            return self._parse_func_definition()
+            return self._parse_function_definition()
         else:
             return self._parse_simple_statement()
 
-    def _parse_func_definition(self) -> FunctionDefinition:
+    def _parse_function_definition(self) -> FunctionDefinition:
+        self._accept(Token.FUNC)
+        type: Type = self._parse_type()
+        name: str = self._parse_identifier()
+        self._accept(Token.LPARAN)
+        parameters: List[FormalParameter] = self._parse_parameters()
+        self._accept(Token.RPARAN)
+        self._accept(Token.LBRACE)
+        # TODO parse fn body
+        self._accept(Token.RBRACE)
+        # TODO return
 
 
 if __name__ == "__main__":
