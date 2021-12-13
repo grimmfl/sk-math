@@ -99,17 +99,18 @@ The language is based on the following grammar:
 
 - Language ::= Statement ( '\n' Statement )*
 - Statement ::= SimpleStatement | FuncDefinition
-- FuncDefinition ::= 'func' ID '(' FuncParams ')' '{' FuncBody '}'
+- FuncDefinition ::= 'func' ('void' | Type) ID '(' FuncParams ')' '{' FuncBody '}'
 - FuncCall ::= ID '(' FuncParams ')'
-- FuncParams ::= Ɛ | (ID (',' ID)*)
-- FuncBody ::= ('\n' SimpleStatement)* '\n' ReturnStatement '\n'
+- FuncParams ::= Ɛ | (Type ID (',' Type ID)*)
+- FuncBody ::= ('\n' SimpleStatement)* '\n' (SimpleStatement) '\n'
+- SimpleStatement ::= VarDecl | VarAssign | Out | FuncCall | ReturnStatement
 - ReturnStatement ::= 'return' Expr
-- SimpleStatement ::= VarDecl | VarAssign | Out
-- VarDecl ::= var ID (',' ID)*
+- VarDecl ::= Type ID (',' ID)*
 - VarAssign ::= ID '=' Expr
 - Out ::= 'out' Expr
 - Expr ::= AddSub ( '\n' AddSub )*
 - AddSub ::= MulDiv ( ( '+' | '-' ) MulDiv )*
 - MulDiv ::= Exponentiation ( ( '\*' | '/' ) Exponentiation )*
 - Exponentiation ::= Atom ( '^' Atom )*
+- Type ::= 'int' | 'float'
 - Atom ::= INT | FLOAT | ID | FuncCall
