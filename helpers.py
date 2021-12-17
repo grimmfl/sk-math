@@ -1,3 +1,4 @@
+from string import digits
 from typing import List, Generic, TypeVar
 
 
@@ -29,3 +30,10 @@ class Stack(Generic[T]):
 
     def is_empty(self) -> bool:
         return len(self._stack) == 0
+
+
+def is_number(text: str) -> bool:
+    for letter in text:
+        if letter not in digits:
+            return False
+    return True

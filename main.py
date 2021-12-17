@@ -3,8 +3,9 @@ import sys
 from string import digits
 from typing import Dict
 
-from compiler.executer import Executer
-from compiler.top_down_parser import TopDownParser
+from compiler.execution.executor import Executor
+from compiler.contextual_analysis.visitor import Visitor
+from compiler.parsing.top_down_parser import TopDownParser
 from editor import Editor
 
 VALID_INPUTS = digits + "*/+-^. "
@@ -34,22 +35,24 @@ def file_to_text(path: str) -> str:
         return file.read()
 
 
-def run(text: str, parser: TopDownParser, executer: Executer):
-    parsed = parser.parse(text)
-    executer.execute(parsed)
+def run(text: str):
+    p = TopDownParser()
+    v = Visitor()
+    e = Executor()
+    parsed = p.parse(text)
+    parsed.visit(v)
+    parsed.execute(e)
 
 
 if __name__ == "__main__":
     if "--dev" not in sys.argv:
         sys.tracebacklimit = 0
-    p = TopDownParser()
-    e = Executer()
     c: Dict = config()
     if c["-f"] is not None:
         if not(c["-f"].endswith(".skm")):
             raise Exception("File needs to have .skm ending.")
         code = file_to_text(c["-f"])
-        run(code, p, e)
+        run(code)
     else:
         while True:
             editor = Editor()
@@ -57,5 +60,5 @@ if __name__ == "__main__":
             os.system("cls")
             print(code)
             print("\n>> ", end="")
-            run(code, p, e)
+            run(code)
             input("\nEnter    Write new code")
