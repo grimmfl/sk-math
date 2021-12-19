@@ -33,7 +33,9 @@ class Stack(Generic[T]):
 
 
 def is_number(text: str) -> bool:
+    if text.count(".") > 1:
+        return False
     for letter in text:
-        if letter not in digits:
+        if letter not in digits + ".":
             return False
     return True

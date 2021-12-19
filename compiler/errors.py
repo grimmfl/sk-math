@@ -21,7 +21,7 @@ class SyntaxError(Exception):
 
 class TypeError(Exception):
     def __init__(self, node: AstNode, expected: Type or List[Type], got: Type):
-        expected_str: str = " or ".join(str(token) for token in expected) if type(expected) else expected
+        expected_str: str = " or ".join(str(token) for token in expected) if type(expected) == list else expected
         self.message = f"At {location_str(node.location)}: Expected {expected_str} - Got {got}"
         super(TypeError, self).__init__(self.message)
 
