@@ -86,6 +86,10 @@ class Editor:
             self.finished = True
             stop_listening()
             time.sleep(0.1)
+        elif key == "tab":
+            for i in range(0, 3):
+                self._insert(" ")
+                self._move_cursor("right")
         elif key in keys or key in switch.keys():
             self._insert(switch[key] if key in switch.keys() else key)
             self._move_cursor("right")
