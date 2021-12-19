@@ -1,7 +1,6 @@
 import os
 import time
 from string import digits, ascii_letters, punctuation
-from threading import Thread
 from typing import Tuple
 
 from sshkeyboard import listen_keyboard, stop_listening
