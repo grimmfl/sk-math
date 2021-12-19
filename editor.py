@@ -93,25 +93,23 @@ class Editor:
         elif key in keys or key in switch.keys():
             self._insert(switch[key] if key in switch.keys() else key)
             self._move_cursor("right")
+        self._print()
 
     def _print(self):
+        os.system("cls")
+        print("F10      Compile code written in editor")
         print("")
-        while not self.finished:
-            os.system("cls")
-            print("F10      Compile code written in editor")
-            print("")
-            lines = self.text.split("\n")
-            for i in range(len(lines)):
-                print(f"{i + 1}   ", end="")
-                line = lines[i]
-                for j in range(len(line)):
-                    if self.cursor_position == (i, j):
-                        print("|", end="")
-                    print(line[j], end="")
-                if self.cursor_position == (i, len(line)):
+        lines = self.text.split("\n")
+        for i in range(len(lines)):
+            print(f"{i + 1}   ", end="")
+            line = lines[i]
+            for j in range(len(line)):
+                if self.cursor_position == (i, j):
                     print("|", end="")
-                print("")
-            time.sleep(0.01)
+                print(line[j], end="")
+            if self.cursor_position == (i, len(line)):
+                print("|", end="")
+            print("")
 
 
 if __name__ == "__main__":
