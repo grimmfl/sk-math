@@ -34,6 +34,7 @@ Statements build the base structure of your code.
 A statement can be one of the following:
 - Variable Declaration / Assignment
 - Function Declaration
+- Function Call
 - Output
 
 A new line ends a statement and starts a new one
@@ -50,22 +51,21 @@ Precedences for arithmetic expression follow the basic mathematical rules.
 Parantheses are not supported yet.
 
 #### Variable Declaration
-- Single Variable Declaration: ```var x```
-- Multiple Variable Declaration: ```var x, y, z```
+- Single Variable Declaration: ```int x```
+- Multiple Variable Declaration: ```float x, y, z```
 
 Variables can not be declared more than once in a scope.
 
 #### Variable Assignment
 - Constant Assignment: ```x = 5```
-- Variable Assignment: ```y = 3 * x + 4.6```
+- Variable Assignment: ```y = 3.0 * x + 4.6```
 
 Variables need to be declared before a value can be assigned to them.
-
-The assigned value has to be an expression.
+If the variable is declared as ```float``` the value needs to be a float too. ```4``` is not a float value.
 
 #### Function Definition
 ```
-func foo(x, y, z) {
+func int foo(int x, int y, int z) {
   var a = x + y
   return a * z
 }
@@ -73,16 +73,30 @@ func foo(x, y, z) {
 
 Functions start a new scope.
 
-Functions always need to have a return statement as the last statement.
+The ```func``` keyword is followed by the return type of the function.
 
-Newlines are mandatory after the opening and before the closing brace.
+Parameters are separated with a ```,``` and need to have a type.
+
+If a function has a return type, it needs to return a value of that type.
+
+If your functions does not return anything, you can use ```void``` as the return type:
+
+```
+func void bar(int x) {
+    out x + 5
+}
+```
 
 #### Function Calls
+Function calls can be used as statements:
+
+```foo(1, y, 3)```
+
+or  as expressions:
+
 ```x = foo(1, y, 3) + z```
 
-A function call is not a statement. It always has to be used as an expression.
-
-The actual parameters need to be either constants or variable identifiers. You can not use an expression as a parameter.
+The actual parameters can be expressions and need to match the formal parameters of the function definition in count and type.
 
 #### Outputs
 ```out 5```
@@ -99,17 +113,18 @@ The language is based on the following grammar:
 
 - Language ::= Statement ( '\n' Statement )*
 - Statement ::= SimpleStatement | FuncDefinition
-- FuncDefinition ::= 'func' ID '(' FuncParams ')' '{' FuncBody '}'
+- FuncDefinition ::= 'func' ('void' | Type) ID '(' FuncParams ')' '{' FuncBody '}'
 - FuncCall ::= ID '(' FuncParams ')'
-- FuncParams ::= Ɛ | (ID (',' ID)*)
-- FuncBody ::= ('\n' SimpleStatement)* '\n' ReturnStatement '\n'
+- FuncParams ::= Ɛ | (Type ID (',' Type ID)*)
+- FuncBody ::= ('\n' SimpleStatement)* '\n' (SimpleStatement) '\n'
+- SimpleStatement ::= VarDecl | VarAssign | Out | FuncCall | ReturnStatement
 - ReturnStatement ::= 'return' Expr
-- SimpleStatement ::= VarDecl | VarAssign | Out
-- VarDecl ::= var ID (',' ID)*
+- VarDecl ::= Type ID (',' ID)*
 - VarAssign ::= ID '=' Expr
 - Out ::= 'out' Expr
 - Expr ::= AddSub ( '\n' AddSub )*
 - AddSub ::= MulDiv ( ( '+' | '-' ) MulDiv )*
 - MulDiv ::= Exponentiation ( ( '\*' | '/' ) Exponentiation )*
 - Exponentiation ::= Atom ( '^' Atom )*
+- Type ::= 'int' | 'float'
 - Atom ::= INT | FLOAT | ID | FuncCall
