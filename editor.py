@@ -14,9 +14,7 @@ class Editor:
         self.text = ""
         self.line = 1
         self.cursor_position = (0, 0)
-        self.t = Thread(target=self._print, daemon=True)
-        self.t.start()
-        self.finished = False
+        self._print()
         listen_keyboard(on_press=self._on_press, on_release=None, delay_second_char=0.05, lower=False)
 
     def _get_line_length(self, line: int) -> int:
@@ -83,7 +81,6 @@ class Editor:
         elif key == "left" or key == "right" or key == "up" or key == "down":
             self._move_cursor(key)
         elif key == "f10":
-            self.finished = True
             stop_listening()
             time.sleep(0.1)
         elif key == "tab":
