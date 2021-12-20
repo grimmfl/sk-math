@@ -21,6 +21,7 @@ The language currently supports the following operations:
 - Subtraction ( - )
 - Multiplication ( * )
 - Division ( / )
+- Modulo ( % )
 - Exponentiation ( ^ )
 - Variable Declarations and Assignments
 - Function Definitions and Calls
