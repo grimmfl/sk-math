@@ -133,9 +133,13 @@ The language is based on the following grammar:
 - VarDecl ::= Type ID (',' ID)*
 - VarAssign ::= ID '=' Expr
 - Out ::= 'out' Expr
-- Expr ::= AddSub ( '\n' AddSub )*
+- Expr ::= Or
+- Or ::= And ( '||' And )*
+- And ::= Comparison ( '&&' Comparison)*
+- Comparison ::= AddSub (Ɛ | (ComparisonOp AddSub))
+- ComparisonOp ::= '==' | '!=' | '<=' | '>=' | '<' | '>'
 - AddSub ::= MulDiv ( ( '+' | '-' ) MulDiv )*
 - MulDiv ::= Exponentiation ( ( '\*' | '/' ) Exponentiation )*
 - Exponentiation ::= Atom ( '^' Atom )*
-- Type ::= 'int' | 'float'
-- Atom ::= INT | FLOAT | ID | FuncCall
+- Type ::= 'int' | 'float' | 'bool'
+- Atom ::= INT | FLOAT | ID | FuncCall | 'true' | 'false'
