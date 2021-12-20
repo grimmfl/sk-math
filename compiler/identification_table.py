@@ -48,6 +48,9 @@ class IdentificationTable(Generic[T]):
             raise FunctionNameInUseError(name, definition)
         self._functions[name] = definition
 
+    def update_function(self, name: str, definition: "FunctionDefinition"):
+        self._functions[name] = definition
+
     def get_function(self, name: str, node: "AstNode") -> "FunctionDefinition":
         if name not in self._functions.keys():
             raise FunctionNotDefinedError(name, node)

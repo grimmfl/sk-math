@@ -95,8 +95,8 @@ class TopDownParser:
             raise SyntaxError(Token.NEWL, self.current_token, self.current_location)
         return Module(statements, location=(0, 0))
 
-    def _parse_statement(self, is_part_of_function=False) -> Statement:
-        if self.current_token == Token.FUNC.value and not is_part_of_function:
+    def _parse_statement(self, is_nested=False) -> Statement:
+        if self.current_token == Token.FUNC.value and not is_nested:
             return self._parse_function_definition()
         else:
             return self._parse_simple_statement()
@@ -108,6 +108,7 @@ class TopDownParser:
             Token.BOOL.value: self._parse_variable_declaration,
             Token.OUT.value: self._parse_out_statement,
             Token.RETURN.value: self._parse_return_statement,
+            Token.IF.value: self._parse_if_statement,
         }
         if self.current_token in switch.keys():
             return switch[self.current_token]()
@@ -115,6 +116,23 @@ class TopDownParser:
             return self._parse_function_call()
         else:
             return self._parse_variable_assignment()
+
+    def _parse_if_statement(self) -> Statement:
+        location = self.current_location
+        self._accept(Token.IF)
+        self._accept(Token.LPARAN)
+        condition: Expression = self._parse_expression()
+        self._accept(Token.RPARAN)
+        self._accept(Token.LBRACE)
+        body: List[Statement] = self._parse_body()
+        self._accept(Token.RBRACE)
+        else_body: List[Statement] = []
+        if self.current_token == Token.ELSE.value:
+            self._accept()
+            self._accept(Token.LBRACE)
+            else_body = self._parse_body()
+            self._accept(Token.RBRACE)
+        return IfStatement(condition, body, else_body, location)
 
     def _parse_return_statement(self) -> ReturnStatement:
         location = self.current_location
@@ -174,16 +192,16 @@ class TopDownParser:
         parameters: List[FormalParameter] = self._parse_formal_parameters()
         self._accept(Token.RPARAN)
         self._accept(Token.LBRACE)
-        body: List[Statement] = self._parse_function_body()
+        body: List[Statement] = self._parse_body()
         self._accept(Token.RBRACE)
         return FunctionDefinition(name, return_type, parameters, body, location)
 
-    def _parse_function_body(self) -> List[Statement]:
+    def _parse_body(self) -> List[Statement]:
         self._accept(Token.NEWL)
-        statements: List[Statement] = [self._parse_statement(is_part_of_function=True)]
+        statements: List[Statement] = [self._parse_statement(is_nested=True)]
         self._accept(Token.NEWL)
         while self.current_token != Token.RBRACE.value:
-            statements.append(self._parse_statement(is_part_of_function=True))
+            statements.append(self._parse_statement(is_nested=True))
             self._accept(Token.NEWL)
         return statements
 
@@ -238,8 +256,8 @@ class TopDownParser:
             Token.NEQ.value: ComparisonType.NOT_EQUAL,
             Token.LEQ.value: ComparisonType.LESS_EQUAL,
             Token.GEQ.value: ComparisonType.GREATER_EQUAL,
-            Token.LE.value: ComparisonType.LESS_EQUAL,
-            Token.GE.value: ComparisonType.GREATER_EQUAL,
+            Token.LE.value: ComparisonType.LESS,
+            Token.GE.value: ComparisonType.GREATER,
         }
         x = self._parse_add_sub()
         if self.current_token in switch.keys():

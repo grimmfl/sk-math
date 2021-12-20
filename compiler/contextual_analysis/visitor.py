@@ -146,6 +146,7 @@ class Visitor:
         self._table.add_identifier(formal_parameter.identifier, formal_parameter.type, formal_parameter)
 
     def visit_function_definition(self, function_definition: "FunctionDefinition"):
+        self._table.add_function(function_definition.name, function_definition)
         self._table.open_scope()
         for parameter in function_definition.formal_parameters:
             parameter.visit(self)
@@ -160,8 +161,16 @@ class Visitor:
             type: ReturnType = statement.get_return_type()
             if type != function_definition.return_type:
                 raise ReturnTypeError(function_definition.return_type, type, statement)
-        self._table.add_function(function_definition.name, function_definition)
+        self._table.update_function(function_definition.name, function_definition)
         self._table.close_scope()
+
+    def visit_if_statement(self, if_statement: "IfStatement"):
+        cond_type: Type = if_statement.condition.visit(self)
+        self._check_type(if_statement, Type.BOOL, cond_type)
+        for statement in if_statement.body:
+            statement.visit(self)
+        for statement in if_statement.else_body:
+            statement.visit(self)
 
     def visit_variable_declaration(self, declaration: "VariableDeclaration"):
         for identifier in declaration.identifiers:
