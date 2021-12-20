@@ -17,6 +17,9 @@ F10 to compile the written code
 ## Features
 
 The language currently supports the following operations:
+- Logical Or ( || )
+- Logical And ( && )
+- Comparisons ( ==, !=, <=, >=, <, > )
 - Addition ( + )
 - Subtraction ( - )
 - Multiplication ( * )
@@ -46,10 +49,18 @@ An expression can be one of the following:
 - ```x``` Variable
 - ```foo(x, 1)``` Function Call
 - ```5 * x + foo(x, 1) ^ 2``` Arithmetic Expression
-
-Precedences for arithmetic expression follow the basic mathematical rules.
+- ```x < 5 && y == 27 + 3 || false``` Boolean Expression
 
 Parantheses are not supported yet.
+
+#### Operator Precedences
+|   | Symbol          | Operator                          |
+| - | --------------- | --------------------------------- |
+| 1 | * / %           | Multiplication, Division, Modulo  |
+| 2 | + -             | Addition, Subtraction             |
+| 3 | == != <= >= < > | Comparisons                       |
+| 4 | &&              | Logical and                       |
+| 5 | \|\|            | Logical or                        |
 
 #### Variable Declaration
 - Single Variable Declaration: ```int x```
@@ -58,7 +69,7 @@ Parantheses are not supported yet.
 Variables can not be declared more than once in a scope.
 
 #### Variable Assignment
-- Constant Assignment: ```x = 5```
+- Constant Assignment: ```x = true```
 - Variable Assignment: ```y = 3.0 * x + 4.6```
 
 Variables need to be declared before a value can be assigned to them.
