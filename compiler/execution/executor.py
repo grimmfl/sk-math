@@ -1,3 +1,4 @@
+import ctypes.wintypes
 from typing import Type as PythonType
 
 
@@ -9,7 +10,8 @@ class Executor:
     def _get_python_type_from_type(type: "Type") -> PythonType:
         switch = {
             Type.INT: int,
-            Type.FLOAT: float
+            Type.FLOAT: float,
+            Type.BOOL: bool,
         }
         return switch[type]
 
@@ -18,6 +20,30 @@ class Executor:
         for statement in module.statements:
             statement.execute(self)
         self._table.close_scope()
+
+    def execute_or(self, or_expr: "Or"):
+        left_op: bool = or_expr.left_operand.execute(self)
+        right_op: bool = or_expr.right_operand.execute(self)
+        return left_op or right_op
+
+    def execute_and(self, and_expr: "And"):
+        left_op: bool = and_expr.left_operand.execute(self)
+        right_op: bool = and_expr.right_operand.execute(self)
+        return left_op and right_op
+
+    def execute_comparison(self, comparison: "Comparison"):
+        p_type: PythonType = self._get_python_type_from_type(comparison.get_type())
+        left_op: p_type = comparison.left_operand.execute(self)
+        right_op: p_type = comparison.right_operand.execute(self)
+        switch = {
+            ComparisonType.EQUAL: lambda x, y: x == y,
+            ComparisonType.NOT_EQUAL: lambda x, y: x != y,
+            ComparisonType.LESS_EQUAL: lambda x, y: x <= y,
+            ComparisonType.GREATER_EQUAL: lambda x, y: x >= y,
+            ComparisonType.LESS: lambda x, y: x < y,
+            ComparisonType.GREATER: lambda x, y: x > y,
+        }
+        return switch[comparison.comparison_type](left_op, right_op)
 
     def execute_addition(self, addition: "Addition"):
         p_type: PythonType = self._get_python_type_from_type(addition.get_type())
@@ -96,13 +122,19 @@ class Executor:
 
     def execute_out_statement(self, out: "OutStatement"):
         value: PYTHON_PRIMITIVE_TYPE = out.expression.execute(self)
-        print(value)
+        print(self._to_output(value))
 
     def execute_function_call(self, call: "FunctionCall"):
         call.call_expression.execute(self)
 
     def execute_return_statement(self, statement: "ReturnStatement"):
         return statement.expression.execute(self)
+
+    @staticmethod
+    def _to_output(value: "PYTHON_PRIMITIVE_TYPE") -> str:
+        if type(value) is bool:
+            return "true" if value else "false"
+        return str(value)
 
 
 from compiler.ast.ast import *

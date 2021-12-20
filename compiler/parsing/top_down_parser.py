@@ -5,7 +5,8 @@ from compiler.errors import SyntaxError
 from compiler.parsing.tokens import Token
 from helpers import Stack, is_number
 
-OPS = ["*", "/", "+", "-", "^", ",", "var", "out", "=", "(", ")", "{", "}", "return", "func"]
+#OPS = ["*", "/", "+", "-", "^", ",", "var", "out", "=", "(", ")", "{", "}", "return", "func"]
+OPS = [Token.__dict__.get(t).value for t in filter(lambda x: not x.startswith("_"), Token.__dict__.keys())]
 
 
 class TopDownParser:
@@ -29,10 +30,10 @@ class TopDownParser:
                 current_symbol = token[i]
                 if (last_symbol in OPS and current_symbol in digits)\
                         or (last_symbol in digits and current_symbol in OPS)\
-                        or last_symbol == "\n" or current_symbol == "\n"\
                         or (current_symbol in OPS) or (last_symbol in OPS):
-                    tokens.append(token[substr_index:i])
-                    substr_index = i
+                    if not last_symbol + current_symbol in OPS:  # For ==
+                        tokens.append(token[substr_index:i])
+                        substr_index = i
             tokens.append(token[substr_index:])
         return [token for token in filter(lambda tok: tok != "", tokens)]
 
@@ -104,6 +105,7 @@ class TopDownParser:
         switch = {
             Token.INT.value: self._parse_variable_declaration,
             Token.FLOAT.value: self._parse_variable_declaration,
+            Token.BOOL.value: self._parse_variable_declaration,
             Token.OUT.value: self._parse_out_statement,
             Token.RETURN.value: self._parse_return_statement,
         }
@@ -211,7 +213,40 @@ class TopDownParser:
         raise SyntaxError([Token.INT, Token.FLOAT, Token.VOID], self.current_token, self.current_location)
 
     def _parse_expression(self) -> Expression:
-        return self._parse_add_sub()
+        return self._parse_or()
+
+    def _parse_or(self) -> Expression:
+        location = self.current_location
+        x = self._parse_and()
+        while self.current_token == Token.OR.value:
+            self._accept()
+            x = Or(x, self._parse_and(), location)
+        return x
+
+    def _parse_and(self) -> Expression:
+        location = self.current_location
+        x = self._parse_comparison()
+        while self.current_token == Token.AND.value:
+            self._accept()
+            x = And(x, self._parse_comparison(), location)
+        return x
+
+    def _parse_comparison(self) -> Expression:
+        location = self.current_location
+        switch = {
+            Token.EQ.value: ComparisonType.EQUAL,
+            Token.NEQ.value: ComparisonType.NOT_EQUAL,
+            Token.LEQ.value: ComparisonType.LESS_EQUAL,
+            Token.GEQ.value: ComparisonType.GREATER_EQUAL,
+            Token.LE.value: ComparisonType.LESS_EQUAL,
+            Token.GE.value: ComparisonType.GREATER_EQUAL,
+        }
+        x = self._parse_add_sub()
+        if self.current_token in switch.keys():
+            comparison_type: ComparisonType = switch[self.current_token]
+            self._accept()
+            x = Comparison(x, self._parse_add_sub(), comparison_type, location)
+        return x
 
     def _parse_add_sub(self) -> Expression:
         location = self.current_location
@@ -249,11 +284,22 @@ class TopDownParser:
         return x
 
     def _parse_atom(self) -> Expression:
+        if self.current_token == Token.TRUE.value or self.current_token == Token.FALSE.value:
+            return self._parse_bool()
         if self.next_token == Token.LPARAN.value:
             return self._parse_call_expression()
         if is_number(self.current_token):
             return self._parse_number()
         return self._parse_identifier()
+
+    def _parse_bool(self) -> Expression:
+        location = self.current_location
+        if self.current_token == Token.TRUE.value:
+            self._accept()
+            return Constant(True, location)
+        elif self.current_token == Token.FALSE.value:
+            self._accept()
+            return Constant(False, location)
 
     def _parse_number(self) -> Expression:
         location = self.current_location
@@ -283,6 +329,9 @@ class TopDownParser:
         elif self.current_token == Token.FLOAT.value:
             self._accept()
             return Type.FLOAT
+        elif self.current_token == Token.BOOL.value:
+            self._accept()
+            return Type.BOOL
         else:
             raise SyntaxError([Token.INT, Token.FLOAT], self.current_token, self.current_location)
 

@@ -75,6 +75,46 @@ class Expression(AstNode):
         return self._type
 
 
+class Or(Expression):
+    def __init__(self, left_operand: Expression, right_operand: Expression, location: Tuple[int, int]):
+        self.left_operand: Expression = left_operand
+        self.right_operand: Expression = right_operand
+        super().__init__(location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_or(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_or(self)
+
+
+class And(Expression):
+    def __init__(self, left_operand: Expression, right_operand: Expression, location: Tuple[int, int]):
+        self.left_operand: Expression = left_operand
+        self.right_operand: Expression = right_operand
+        super().__init__(location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_and(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_and(self)
+
+
+class Comparison(Expression):
+    def __init__(self, left_operand: Expression, right_operand: Expression, type: ComparisonType, location: Tuple[int, int]):
+        self.left_operand: Expression = left_operand
+        self.right_operand: Expression = right_operand
+        self.comparison_type: ComparisonType = type
+        super().__init__(location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_comparison(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_comparison(self)
+
+
 class Addition(Expression):
     def __init__(self, left_operand: Expression, right_operand: Expression, location: Tuple[int, int]):
         self.left_operand: Expression = left_operand
@@ -166,7 +206,7 @@ class IdentifierReference(Expression):
 
 
 class Constant(Expression):
-    def __init__(self, value: int or float, location: Tuple[int, int]):
+    def __init__(self, value: PYTHON_PRIMITIVE_TYPE, location: Tuple[int, int]):
         self.value: int or float = value
         super().__init__(location)
 

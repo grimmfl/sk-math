@@ -19,6 +19,33 @@ class Visitor:
             statement.visit(self)
         self._table.close_scope()
 
+    def visit_or(self, or_expr: "Or") -> Type:
+        l_type: Type = or_expr.left_operand.visit(self)
+        r_type: Type = or_expr.right_operand.visit(self)
+        self._check_type(or_expr, Type.BOOL, l_type)
+        self._check_type(or_expr, Type.BOOL, r_type)
+        or_expr.set_type(Type.BOOL)
+        return Type.BOOL
+
+    def visit_and(self, and_expr: "And") -> Type:
+        l_type: Type = and_expr.left_operand.visit(self)
+        r_type: Type = and_expr.right_operand.visit(self)
+        self._check_type(and_expr, Type.BOOL, l_type)
+        self._check_type(and_expr, Type.BOOL, r_type)
+        and_expr.set_type(Type.BOOL)
+        return Type.BOOL
+
+    def visit_comparison(self, comparison: "Comparison") -> Type:
+        l_type: Type = comparison.left_operand.visit(self)
+        r_type: Type = comparison.right_operand.visit(self)
+        if not l_type.is_numeric():
+            raise TypeError(comparison, NUMERIC_TYPES, l_type)
+        if not r_type.is_numeric():
+            raise TypeError(comparison, NUMERIC_TYPES, r_type)
+        self._check_type(comparison, l_type, r_type)
+        comparison.set_type(Type.BOOL)
+        return Type.BOOL
+
     def visit_addition(self, addition: "Addition") -> Type:
         l_type: Type = addition.left_operand.visit(self)
         r_type: Type = addition.right_operand.visit(self)
@@ -66,8 +93,8 @@ class Visitor:
     def visit_modulo(self, modulo: "Modulo") -> Type:
         l_type: Type = modulo.left_operand.visit(self)
         r_type: Type = modulo.right_operand.visit(self)
-        self._check_type(modulo, l_type, Type.INT)
-        self._check_type(modulo, r_type, Type.INT)
+        self._check_type(modulo, Type.INT, l_type)
+        self._check_type(modulo, Type.INT, r_type)
         modulo.set_type(Type.INT)
         return Type.INT
 
@@ -90,8 +117,10 @@ class Visitor:
     def visit_constant(self, constant: "Constant") -> Type:
         switch = {
             float: Type.FLOAT,
-            int: Type.INT
+            int: Type.INT,
+            bool: Type.BOOL
         }
+        constant.set_type(switch[type(constant.value)])
         return switch[type(constant.value)]
 
     def visit_call_expression(self, expression: "CallExpression") -> Type:
@@ -105,7 +134,8 @@ class Visitor:
         switch = {
             ReturnType.VOID: None,
             ReturnType.INT: Type.INT,
-            ReturnType.FLOAT: Type.FLOAT
+            ReturnType.FLOAT: Type.FLOAT,
+            ReturnType.BOOL: Type.BOOL,
         }
         type: Type = switch[definition.return_type]
         expression.set_type(type)
@@ -152,7 +182,8 @@ class Visitor:
         type: Type = statement.expression.visit(self)
         switch = {
             Type.INT: ReturnType.INT,
-            Type.FLOAT: ReturnType.FLOAT
+            Type.FLOAT: ReturnType.FLOAT,
+            Type.BOOL: ReturnType.BOOL,
         }
         statement.set_return_type(switch[type])
         return switch[type]
