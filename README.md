@@ -87,6 +87,16 @@ func void bar(int x) {
 }
 ```
 
+#### Predefined Functions
+
+The following functions are already implemented:
+
+```func float sqrt(float x)``` calculates the square root of a float x
+
+```func float intToFloat(int x)``` casts an integer to a float
+
+```func int floatToInt(float x)``` casts a float to an integer
+
 #### Function Calls
 Function calls can be used as statements:
 
