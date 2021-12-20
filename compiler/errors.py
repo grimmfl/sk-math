@@ -71,3 +71,10 @@ class ReturnTypeError(Exception):
 class ArgumentCountError(Exception):
     def __init__(self, expected: int, got: int, node: AstNode):
         self.message = f"At {location_str(node.location)}: Expected {expected} - Got {got}"
+        super(ArgumentCountError, self).__init__(self.message)
+
+
+class ReturnOutsideOfFunctionError(Exception):
+    def __init__(self, node: AstNode):
+        self.message = f"At {location_str(node.location)}: Return statement is not allowed outside of a function."
+        super(ReturnOutsideOfFunctionError, self).__init__(self.message)

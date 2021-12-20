@@ -7,6 +7,7 @@ from compiler.ast.ast import *
 class Visitor:
     def __init__(self):
         self._table = IdentificationTable[Type]()
+        self._currently_in_function = False
 
     @staticmethod
     def _check_type(node: "AstNode", type1: Type, type2: Type):
@@ -146,6 +147,7 @@ class Visitor:
         self._table.add_identifier(formal_parameter.identifier, formal_parameter.type, formal_parameter)
 
     def visit_function_definition(self, function_definition: "FunctionDefinition"):
+        self._currently_in_function = True
         self._table.add_function(function_definition.name, function_definition)
         self._table.open_scope()
         for parameter in function_definition.formal_parameters:
@@ -163,6 +165,7 @@ class Visitor:
                 raise ReturnTypeError(function_definition.return_type, type, statement)
         self._table.update_function(function_definition.name, function_definition)
         self._table.close_scope()
+        self._currently_in_function = False
 
     def visit_if_statement(self, if_statement: "IfStatement"):
         cond_type: Type = if_statement.condition.visit(self)
@@ -188,6 +191,8 @@ class Visitor:
         call.call_expression.visit(self)
 
     def visit_return_statement(self, statement: "ReturnStatement"):
+        if not self._currently_in_function:
+            raise ReturnOutsideOfFunctionError(statement)
         type: Type = statement.expression.visit(self)
         switch = {
             Type.INT: ReturnType.INT,

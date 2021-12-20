@@ -10,6 +10,4 @@ func int fibonacci(int n) {
     }
 }
 
-return 10
-
 out fibonacci(10)
