@@ -1,8 +1,8 @@
 float z, y
 z = 4.0
 
-func float cool(float x, float y) {
-    return sqrt(x) * y
+func int cool(float x, float y) {
+    return floatToInt(sqrt(x) * y)
 }
 
-out cool(4.0, 5.0)
+out cool(intToFloat(4), 5.0)

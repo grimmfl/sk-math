@@ -1,4 +1,4 @@
-from typing import Tuple, List, Any
+from typing import Tuple, List, Any, Callable
 
 from compiler.ast.types import *
 
@@ -215,6 +215,16 @@ class CallExpression(Expression):
 
     def execute(self, executor_instance: "Executor"):
         return executor_instance.execute_call_expression(self)
+
+
+class CustomExpression(Expression):
+    def __init__(self, expression: Expression, function: Callable[[Any], Any], location: Tuple[int, int]):
+        self.expression: Expression = expression
+        self.function: Callable[[Any], Any] = function
+        super().__init__(location)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_custom_expression(self)
 
 
 class SimpleStatement(Statement):

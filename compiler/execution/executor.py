@@ -76,6 +76,10 @@ class Executor:
             statement.execute(self)
         self._table.close_scope()
 
+    def execute_custom_expression(self, expression: "CustomExpression"):
+        value: PYTHON_PRIMITIVE_TYPE = expression.expression.execute(self)
+        return expression.function(value)
+
     def execute_variable_declaration(self, declaration: "VariableDeclaration"):
         for identifier in declaration.identifiers:
             self._table.add_identifier(identifier, None, declaration)
