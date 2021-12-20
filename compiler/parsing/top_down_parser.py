@@ -215,26 +215,29 @@ class TopDownParser:
 
     def _parse_add_sub(self) -> Expression:
         location = self.current_location
-        x = self._parse_mul_div()
+        x = self._parse_mul_div_mod()
         while self.current_token == Token.ADD.value or self.current_token == Token.SUB.value:
             if self.current_token == Token.ADD.value:
                 self._accept()
-                x = Addition(x, self._parse_mul_div(), location)
+                x = Addition(x, self._parse_mul_div_mod(), location)
             else:
                 self._accept()
-                x = Subtraction(x, self._parse_mul_div(), location)
+                x = Subtraction(x, self._parse_mul_div_mod(), location)
         return x
 
-    def _parse_mul_div(self) -> Expression:
+    def _parse_mul_div_mod(self) -> Expression:
         location = self.current_location
         x = self._parse_exponentiation()
-        while self.current_token == Token.MUL.value or self.current_token == Token.DIV.value:
+        while self.current_token == Token.MUL.value or self.current_token == Token.DIV.value or self.current_token == Token.MOD.value:
             if self.current_token == Token.MUL.value:
                 self._accept()
                 x = Multiplication(x, self._parse_exponentiation(), location)
-            else:
+            elif self.current_token == Token.DIV.value:
                 self._accept()
                 x = Division(x, self._parse_exponentiation(), location)
+            else:
+                self._accept()
+                x = Modulo(x, self._parse_exponentiation(), location)
         return x
 
     def _parse_exponentiation(self) -> Expression:

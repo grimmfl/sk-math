@@ -7,6 +7,7 @@ class Token(Enum):
     MUL = "*"
     DIV = "/"
     EXP = "^"
+    MOD = "%"
     NEWL = "\n"
     INT = "int"
     FLOAT = "float"

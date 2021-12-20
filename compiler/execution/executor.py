@@ -43,6 +43,12 @@ class Executor:
         right_op: p_type = division.right_operand.execute(self)
         return left_op / right_op
 
+    def execute_modulo(self, modulo: "Modulo"):
+        p_type: PythonType = self._get_python_type_from_type(modulo.get_type())
+        left_op: p_type = modulo.left_operand.execute(self)
+        right_op: p_type = modulo.right_operand.execute(self)
+        return left_op % right_op
+
     def execute_exponentiation(self, exponentiation: "Exponentiation"):
         p_type: PythonType = self._get_python_type_from_type(exponentiation.get_type())
         left_op: p_type = exponentiation.base.execute(self)

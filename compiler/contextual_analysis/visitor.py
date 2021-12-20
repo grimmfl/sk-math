@@ -1,3 +1,5 @@
+import typing_extensions
+
 from compiler.errors import *
 from compiler.ast.ast import *
 
@@ -60,6 +62,14 @@ class Visitor:
         self._check_type(division, l_type, r_type)
         division.set_type(l_type)
         return l_type
+
+    def visit_modulo(self, modulo: "Modulo") -> Type:
+        l_type: Type = modulo.left_operand.visit(self)
+        r_type: Type = modulo.right_operand.visit(self)
+        self._check_type(modulo, l_type, Type.INT)
+        self._check_type(modulo, r_type, Type.INT)
+        modulo.set_type(Type.INT)
+        return Type.INT
 
     def visit_exponentiation(self, exponentiation: "Exponentiation") -> Type:
         l_type: Type = exponentiation.base.visit(self)

@@ -127,6 +127,19 @@ class Division(Expression):
         return executor_instance.execute_division(self)
 
 
+class Modulo(Expression):
+    def __init__(self, left_operand: Expression, right_operand: Expression, location: Tuple[int, int]):
+        self.left_operand: Expression = left_operand
+        self.right_operand: Expression = right_operand
+        super().__init__(location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_modulo(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_modulo(self)
+
+
 class Exponentiation(Expression):
     def __init__(self, base: Expression, power: Expression, location: Tuple[int, int]):
         self.base: Expression = base

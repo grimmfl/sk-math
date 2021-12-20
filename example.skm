@@ -2,7 +2,7 @@ float z, y
 z = 4.0
 
 func int cool(float x, float y) {
-    return floatToInt(sqrt(x) * y)
+    return floatToInt(sqrt(x) * y) % 4
 }
 
 out cool(intToFloat(4), 5.0)
