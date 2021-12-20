@@ -1,10 +1,8 @@
-func float sqrt(float x) {
-    return x ^ 0.5
-}
-
 float z, y
 z = 4.0
-out sqrt(z) + sqrt(9.0) + sqrt(2.0)
 
-y = 25.0
-out z - sqrt(y)
+func float cool(float x, float y) {
+    return sqrt(x) * y
+}
+
+out cool(4.0, 5.0)

@@ -11,6 +11,8 @@ class IdentificationTable(Generic[T]):
         self._identifiers: Dict[str, Stack[T]] = {}
         self._scopes: Stack[List[str]] = Stack()
         self._functions: Dict[str, "FunctionDefinition"] = {}
+        for function in PREDEFINED_FUNCTIONS:
+            function(self)
 
     def add_identifier(self, identifier: str, t: T, node: "AstNode"):
         if identifier in self._scopes.peak():
@@ -53,3 +55,4 @@ class IdentificationTable(Generic[T]):
 
 
 from compiler.ast.ast import *
+from compiler.predefined.functions import PREDEFINED_FUNCTIONS
