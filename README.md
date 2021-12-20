@@ -80,12 +80,16 @@ The body needs to start with ```{``` followed by a newline and end with a newlin
 if (x < 5) {
     int y = 3 + 2
     z = y * 7
+} elif (x < 7) {
+    z = z + 7
+} elif (x == 7) {
+    x = 0
 } else {
     z = 2
 }
 ```
 
-If Statements can have an ```else``` block. The ```else``` keyboard needs to be after the closing ```}``` without a newline.
+If Statements can have multiple ```elif``` blocks and one ```else``` block. The ```elif``` and ```else``` keywords needs to be after the closing ```}``` without a newline.
 
 The body needs to start with ```{``` followed by a newline and end with a newline followed by ```}```.
 
@@ -171,7 +175,8 @@ The language is based on the following grammar:
 - FuncParams ::= Ɛ | (Type ID (',' Type ID)*)
 - Body ::= ('\n' Statement)* '\n' (Statement) '\n'
 - SimpleStatement ::= VarDecl | VarAssign | Out | FuncCall | ReturnStatement
-- IfStatement ::= 'if' '(' Expr ')' '{' Body '}' (ElseStatement | Ɛ)
+- IfStatement ::= 'if' '(' Expr ')' '{' Body '}' ElifStatement* (ElseStatement | Ɛ)
+- ElifStatement ::= 'elif' '(' Expr ')' '{' Body '}'
 - ElseStatement ::= 'else' '{' Body '}'
 - ReturnStatement ::= 'return' Expr
 - VarDecl ::= Type ID (',' ID)*

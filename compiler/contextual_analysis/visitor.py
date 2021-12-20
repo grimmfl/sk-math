@@ -172,6 +172,8 @@ class Visitor:
         self._check_type(if_statement, Type.BOOL, cond_type)
         for statement in if_statement.body:
             statement.visit(self)
+        for elif_statement in if_statement.elifs:
+            elif_statement.visit(self)
         for statement in if_statement.else_body:
             statement.visit(self)
 

@@ -97,6 +97,9 @@ class Executor:
     def execute_if_statement(self, if_statement: "IfStatement"):
         if if_statement.condition.execute(self):
             return self._execute_body(if_statement.body)
+        for elif_statement in if_statement.elifs:
+            if elif_statement.condition.execute(self):
+                return self._execute_body(elif_statement.body)
         else:
             return self._execute_body(if_statement.else_body)
 

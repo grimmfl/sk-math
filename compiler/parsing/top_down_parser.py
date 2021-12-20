@@ -126,13 +126,24 @@ class TopDownParser:
         self._accept(Token.LBRACE)
         body: List[Statement] = self._parse_body()
         self._accept(Token.RBRACE)
+        elifs: List[IfStatement] = []
+        while self.current_token == Token.ELIF.value:
+            elif_location = self.current_location
+            self._accept()
+            self._accept(Token.LPARAN)
+            elif_condition: Expression = self._parse_expression()
+            self._accept(Token.RPARAN)
+            self._accept(Token.LBRACE)
+            elif_body: List[Statement] = self._parse_body()
+            self._accept(Token.RBRACE)
+            elifs.append(IfStatement(elif_condition, elif_body, [], [], elif_location))
         else_body: List[Statement] = []
         if self.current_token == Token.ELSE.value:
             self._accept()
             self._accept(Token.LBRACE)
             else_body = self._parse_body()
             self._accept(Token.RBRACE)
-        return IfStatement(condition, body, else_body, location)
+        return IfStatement(condition, body, elifs, else_body, location)
 
     def _parse_return_statement(self) -> ReturnStatement:
         location = self.current_location

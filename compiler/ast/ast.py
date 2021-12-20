@@ -102,7 +102,8 @@ class And(Expression):
 
 
 class Comparison(Expression):
-    def __init__(self, left_operand: Expression, right_operand: Expression, type: ComparisonType, location: Tuple[int, int]):
+    def __init__(self, left_operand: Expression, right_operand: Expression, type: ComparisonType,
+                 location: Tuple[int, int]):
         self.left_operand: Expression = left_operand
         self.right_operand: Expression = right_operand
         self.comparison_type: ComparisonType = type
@@ -231,7 +232,8 @@ class FormalParameter(AstNode):
 
 
 class FunctionDefinition(Statement):
-    def __init__(self, name: str, return_type: ReturnType, formal_parameters: List[FormalParameter], body: List[Statement],
+    def __init__(self, name: str, return_type: ReturnType, formal_parameters: List[FormalParameter],
+                 body: List[Statement],
                  location: Tuple[int, int]):
         self.name: str = name
         self.return_type: ReturnType = return_type
@@ -286,9 +288,11 @@ class SimpleStatement(Statement):
 
 
 class IfStatement(Statement):
-    def __init__(self, condition: Expression, body: List[Statement], else_body: List[Statement], location: Tuple[int, int]):
+    def __init__(self, condition: Expression, body: List[Statement], elifs: List["IfStatement"],
+                 else_body: List[Statement], location: Tuple[int, int]):
         self.condition: Expression = condition
         self.body: List[Statement] = body
+        self.elifs: List[IfStatement] = elifs
         self.else_body: List[Statement] = else_body
         super().__init__(location)
 
