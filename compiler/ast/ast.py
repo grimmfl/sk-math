@@ -285,6 +285,20 @@ class SimpleStatement(Statement):
         super().__init__(location)
 
 
+class IfStatement(Statement):
+    def __init__(self, condition: Expression, body: List[Statement], else_body: List[Statement], location: Tuple[int, int]):
+        self.condition: Expression = condition
+        self.body: List[Statement] = body
+        self.else_body: List[Statement] = else_body
+        super().__init__(location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_if_statement(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_if_statement(self)
+
+
 class VariableDeclaration(SimpleStatement):
     def __init__(self, type: Type, identifiers: List[str], location: Tuple[int, int]):
         self.type: Type = type

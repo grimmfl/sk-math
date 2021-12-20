@@ -33,3 +33,5 @@ class Token(Enum):
     LBRACE = "{"
     RBRACE = "}"
     RETURN = "return"
+    IF = "if"
+    ELSE = "else"

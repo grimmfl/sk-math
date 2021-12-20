@@ -1,5 +1,6 @@
 import ctypes.wintypes
 from typing import Type as PythonType
+from typing import List
 
 
 class Executor:
@@ -93,6 +94,12 @@ class Executor:
     def execute_function_definition(self, definition: "FunctionDefinition"):
         self._table.add_function(definition.name, definition)
 
+    def execute_if_statement(self, if_statement: "IfStatement"):
+        if if_statement.condition.execute(self):
+            return self._execute_body(if_statement.body)
+        else:
+            return self._execute_body(if_statement.else_body)
+
     def execute_call_expression(self, call: "CallExpression"):
         self._table.open_scope()
         definition: "FunctionDefinition" = call.get_function_definition()
@@ -100,13 +107,15 @@ class Executor:
             identifier: str = definition.formal_parameters[i].identifier
             value: PYTHON_PRIMITIVE_TYPE = call.actual_parameters[i].execute(self)
             self._table.add_identifier(identifier, value, call)
-        for statement in definition.body:
-            if isinstance(statement, ReturnStatement):
-                value = statement.execute(self)
-                self._table.close_scope()
-                return value
-            statement.execute(self)
+        return_value = self._execute_body(definition.body)
         self._table.close_scope()
+        return return_value
+
+    def _execute_body(self, body: List["Statement"]):
+        for statement in body:
+            value = statement.execute(self)
+            if isinstance(statement, ReturnStatement) or value is not None:
+                return value
 
     def execute_custom_expression(self, expression: "CustomExpression"):
         value: PYTHON_PRIMITIVE_TYPE = expression.expression.execute(self)

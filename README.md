@@ -28,6 +28,7 @@ The language currently supports the following operations:
 - Exponentiation ( ^ )
 - Variable Declarations and Assignments
 - Function Definitions and Calls
+- If Statements
 - Outputs
 
 ## Documentation
@@ -40,6 +41,7 @@ A statement can be one of the following:
 - Function Declaration
 - Function Call
 - Output
+- If Statements
 
 A new line ends a statement and starts a new one
 
@@ -61,6 +63,33 @@ Parantheses are not supported yet.
 | 3 | == != <= >= < > | Comparisons                       |
 | 4 | &&              | Logical and                       |
 | 5 | \|\|            | Logical or                        |
+
+#### If Statements
+```
+if (x < 5) {
+    int y = 3 + 2
+    z = y * 7
+}
+```
+
+The condition needs to be of type ```bool```.
+
+The body needs to start with ```{``` followed by a newline and end with a newline followed by ```}```.
+
+```
+if (x < 5) {
+    int y = 3 + 2
+    z = y * 7
+} else {
+    z = 2
+}
+```
+
+If Statements can have an ```else``` block. The ```else``` keyboard needs to be after the closing ```}``` without a newline.
+
+The body needs to start with ```{``` followed by a newline and end with a newline followed by ```}```.
+
+If Statements can be nested.
 
 #### Variable Declaration
 - Single Variable Declaration: ```int x```
@@ -88,6 +117,8 @@ Functions start a new scope.
 The ```func``` keyword is followed by the return type of the function.
 
 Parameters are separated with a ```,``` and need to have a type.
+
+The body needs to start with ```{``` followed by a newline and end with a newline followed by ```}```.
 
 If a function has a return type, it needs to return a value of that type.
 
@@ -134,12 +165,14 @@ I use a simple LL(2) Top-Down-Parser.
 The language is based on the following grammar:
 
 - Language ::= Statement ( '\n' Statement )*
-- Statement ::= SimpleStatement | FuncDefinition
-- FuncDefinition ::= 'func' ('void' | Type) ID '(' FuncParams ')' '{' FuncBody '}'
+- Statement ::= SimpleStatement | FuncDefinition | IfStatement
+- FuncDefinition ::= 'func' ('void' | Type) ID '(' FuncParams ')' '{' Body '}'
 - FuncCall ::= ID '(' FuncParams ')'
 - FuncParams ::= Ɛ | (Type ID (',' Type ID)*)
-- FuncBody ::= ('\n' SimpleStatement)* '\n' (SimpleStatement) '\n'
+- Body ::= ('\n' Statement)* '\n' (Statement) '\n'
 - SimpleStatement ::= VarDecl | VarAssign | Out | FuncCall | ReturnStatement
+- IfStatement ::= 'if' '(' Expr ')' '{' Body '}' (ElseStatement | Ɛ)
+- ElseStatement ::= 'else' '{' Body '}'
 - ReturnStatement ::= 'return' Expr
 - VarDecl ::= Type ID (',' ID)*
 - VarAssign ::= ID '=' Expr
