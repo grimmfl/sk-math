@@ -19,6 +19,7 @@ F10 to compile the written code
 The language currently supports the following operations:
 - Logical Or ( || )
 - Logical And ( && )
+- Logical Not ( ! )
 - Comparisons ( ==, !=, <=, >=, <, > )
 - Addition ( + )
 - Subtraction ( - )
@@ -26,6 +27,7 @@ The language currently supports the following operations:
 - Division ( / )
 - Modulo ( % )
 - Exponentiation ( ^ )
+- Unary Minus ( - )
 - Variable Declarations and Assignments
 - Function Definitions and Calls
 - If Statements
@@ -50,17 +52,18 @@ An expression can be one of the following:
 - ```5``` Constant
 - ```x``` Variable
 - ```foo(x, 1)``` Function Call
-- ```5 * x + foo(x, 1) ^ 2``` Arithmetic Expression
-- ```x < 5 && y == 27 + 3 || false``` Boolean Expression
+- ```(5 * (x + foo(x, 1))) ^ 2``` Arithmetic Expression
+- ```x < 5 && y == 27 + 3 || !false``` Boolean Expression
 
 #### Operator Precedences
 |   | Symbol          | Operator                          |
 | - | --------------- | --------------------------------- |
-| 1 | * / %           | Multiplication, Division, Modulo  |
-| 2 | + -             | Addition, Subtraction             |
-| 3 | == != <= >= < > | Comparisons                       |
-| 4 | &&              | Logical and                       |
-| 5 | \|\|            | Logical or                        |
+| 1 | - !             | Unary Minus, Logical Not          |
+| 2 | * / %           | Multiplication, Division, Modulo  |
+| 3 | + -             | Addition, Subtraction             |
+| 4 | == != <= >= < > | Comparisons                       |
+| 5 | &&              | Logical and                       |
+| 6 | \|\|            | Logical or                        |
 
 You can use parentheses to work around those precedences.
 

@@ -194,6 +194,30 @@ class Exponentiation(Expression):
         return executor_instance.execute_exponentiation(self)
 
 
+class UnaryMinus(Expression):
+    def __init__(self, value: Expression, location: Tuple[int, int]):
+        self.value: Expression = value
+        super().__init__(location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_unary_minus(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_unary_minus(self)
+
+
+class Not(Expression):
+    def __init__(self, value: Expression, location: Tuple[int, int]):
+        self.value: Expression = value
+        super().__init__(location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_not(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_not(self)
+
+
 class IdentifierReference(Expression):
     def __init__(self, identifier: str, location: Tuple[int, int]):
         self.identifier: str = identifier

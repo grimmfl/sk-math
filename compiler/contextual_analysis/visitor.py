@@ -110,6 +110,19 @@ class Visitor:
         exponentiation.set_type(l_type)
         return l_type
 
+    def visit_unary_minus(self, unary_minus: "UnaryMinus") -> Type:
+        type: Type = unary_minus.value.visit(self)
+        if not type.is_numeric():
+            raise TypeError(unary_minus, NUMERIC_TYPES, type)
+        unary_minus.set_type(type)
+        return type
+
+    def visit_not(self, not_expr: "Not") -> Type:
+        type: Type = not_expr.value.visit(self)
+        self._check_type(not_expr, Type.BOOL, type)
+        not_expr.set_type(Type.BOOL)
+        return Type.BOOL
+
     def visit_identifier_reference(self, reference: "IdentifierReference") -> Type:
         type: Type = self._table.get_identifier(reference.identifier, reference)
         reference.set_type(type)
