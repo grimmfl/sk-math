@@ -53,8 +53,6 @@ An expression can be one of the following:
 - ```5 * x + foo(x, 1) ^ 2``` Arithmetic Expression
 - ```x < 5 && y == 27 + 3 || false``` Boolean Expression
 
-Parantheses are not supported yet.
-
 #### Operator Precedences
 |   | Symbol          | Operator                          |
 | - | --------------- | --------------------------------- |
@@ -63,6 +61,8 @@ Parantheses are not supported yet.
 | 3 | == != <= >= < > | Comparisons                       |
 | 4 | &&              | Logical and                       |
 | 5 | \|\|            | Logical or                        |
+
+You can use parentheses to work around those precedences.
 
 #### If Statements
 ```

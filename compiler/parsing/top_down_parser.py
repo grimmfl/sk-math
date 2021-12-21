@@ -112,7 +112,7 @@ class TopDownParser:
         }
         if self.current_token in switch.keys():
             return switch[self.current_token]()
-        if self.next_token == Token.LPARAN.value:
+        if self.next_token == Token.LPAREN.value:
             return self._parse_function_call()
         else:
             return self._parse_variable_assignment()
@@ -120,9 +120,9 @@ class TopDownParser:
     def _parse_if_statement(self) -> Statement:
         location = self.current_location
         self._accept(Token.IF)
-        self._accept(Token.LPARAN)
+        self._accept(Token.LPAREN)
         condition: Expression = self._parse_expression()
-        self._accept(Token.RPARAN)
+        self._accept(Token.RPAREN)
         self._accept(Token.LBRACE)
         body: List[Statement] = self._parse_body()
         self._accept(Token.RBRACE)
@@ -130,9 +130,9 @@ class TopDownParser:
         while self.current_token == Token.ELIF.value:
             elif_location = self.current_location
             self._accept()
-            self._accept(Token.LPARAN)
+            self._accept(Token.LPAREN)
             elif_condition: Expression = self._parse_expression()
-            self._accept(Token.RPARAN)
+            self._accept(Token.RPAREN)
             self._accept(Token.LBRACE)
             elif_body: List[Statement] = self._parse_body()
             self._accept(Token.RBRACE)
@@ -173,13 +173,13 @@ class TopDownParser:
     def _parse_call_expression(self) -> CallExpression:
         location = self.current_location
         name: str = self._parse_name()
-        self._accept(Token.LPARAN)
+        self._accept(Token.LPAREN)
         actual_parameters: List[Expression] = self._parse_actual_parameters()
-        self._accept(Token.RPARAN)
+        self._accept(Token.RPAREN)
         return CallExpression(name, actual_parameters, location)
 
     def _parse_actual_parameters(self) -> List[Expression]:
-        if self.current_token == Token.RPARAN.value:
+        if self.current_token == Token.RPAREN.value:
             return []
         parameters: List[Expression] = [self._parse_expression()]
         while self.current_token == Token.COMMA.value:
@@ -199,9 +199,9 @@ class TopDownParser:
         self._accept(Token.FUNC)
         return_type: ReturnType = self._parse_return_type()
         name: str = self._parse_name()
-        self._accept(Token.LPARAN)
+        self._accept(Token.LPAREN)
         parameters: List[FormalParameter] = self._parse_formal_parameters()
-        self._accept(Token.RPARAN)
+        self._accept(Token.RPAREN)
         self._accept(Token.LBRACE)
         body: List[Statement] = self._parse_body()
         self._accept(Token.RBRACE)
@@ -244,20 +244,34 @@ class TopDownParser:
     def _parse_expression(self) -> Expression:
         return self._parse_or()
 
+    def _parse_braced(self) -> Expression or None:
+        if self.current_token == Token.LPAREN.value:
+            self._accept()
+            x = self._parse_expression()
+            self._accept(Token.RPAREN)
+            return x
+        return None
+
     def _parse_or(self) -> Expression:
         location = self.current_location
-        x = self._parse_and()
+        x = self._parse_braced()
+        x = self._parse_and() if x is None else x
         while self.current_token == Token.OR.value:
             self._accept()
-            x = Or(x, self._parse_and(), location)
+            y = self._parse_braced()
+            y = self._parse_and() if y is None else y
+            x = Or(x, y, location)
         return x
 
     def _parse_and(self) -> Expression:
         location = self.current_location
-        x = self._parse_comparison()
+        x = self._parse_braced()
+        x = self._parse_comparison() if x is None else x
         while self.current_token == Token.AND.value:
             self._accept()
-            x = And(x, self._parse_comparison(), location)
+            y = self._parse_braced()
+            y = self._parse_comparison() if y is None else y
+            x = And(x, y, location)
         return x
 
     def _parse_comparison(self) -> Expression:
@@ -270,52 +284,70 @@ class TopDownParser:
             Token.LE.value: ComparisonType.LESS,
             Token.GE.value: ComparisonType.GREATER,
         }
-        x = self._parse_add_sub()
+        x = self._parse_braced()
+        x = self._parse_add_sub() if x is None else x
         if self.current_token in switch.keys():
             comparison_type: ComparisonType = switch[self.current_token]
             self._accept()
-            x = Comparison(x, self._parse_add_sub(), comparison_type, location)
+            y = self._parse_braced()
+            y = self._parse_add_sub() if y is None else y
+            x = Comparison(x, y, comparison_type, location)
         return x
 
     def _parse_add_sub(self) -> Expression:
         location = self.current_location
-        x = self._parse_mul_div_mod()
+        x = self._parse_braced()
+        x = self._parse_mul_div_mod() if x is None else x
         while self.current_token == Token.ADD.value or self.current_token == Token.SUB.value:
             if self.current_token == Token.ADD.value:
                 self._accept()
-                x = Addition(x, self._parse_mul_div_mod(), location)
+                y = self._parse_braced()
+                y = self._parse_mul_div_mod() if y is None else y
+                x = Addition(x, y, location)
             else:
                 self._accept()
-                x = Subtraction(x, self._parse_mul_div_mod(), location)
+                y = self._parse_braced()
+                y = self._parse_mul_div_mod() if y is None else y
+                x = Subtraction(x, y, location)
         return x
 
     def _parse_mul_div_mod(self) -> Expression:
         location = self.current_location
-        x = self._parse_exponentiation()
+        x = self._parse_braced()
+        x = self._parse_exponentiation() if x is None else x
         while self.current_token == Token.MUL.value or self.current_token == Token.DIV.value or self.current_token == Token.MOD.value:
             if self.current_token == Token.MUL.value:
                 self._accept()
-                x = Multiplication(x, self._parse_exponentiation(), location)
+                y = self._parse_braced()
+                y = self._parse_exponentiation() if y is None else y
+                x = Multiplication(x, y, location)
             elif self.current_token == Token.DIV.value:
                 self._accept()
-                x = Division(x, self._parse_exponentiation(), location)
+                y = self._parse_braced()
+                y = self._parse_exponentiation() if y is None else y
+                x = Division(x, y, location)
             else:
                 self._accept()
-                x = Modulo(x, self._parse_exponentiation(), location)
+                y = self._parse_braced()
+                y = self._parse_exponentiation() if y is None else y
+                x = Modulo(x, y, location)
         return x
 
     def _parse_exponentiation(self) -> Expression:
         location = self.current_location
-        x = self._parse_atom()
+        x = self._parse_braced()
+        x = self._parse_atom() if x is None else x
         while self.current_token == Token.EXP.value:
             self._accept()
-            x = Exponentiation(x, self._parse_atom(), location)
+            y = self._parse_braced()
+            y = self._parse_atom() if y is None else y
+            x = Exponentiation(x, y, location)
         return x
 
     def _parse_atom(self) -> Expression:
         if self.current_token == Token.TRUE.value or self.current_token == Token.FALSE.value:
             return self._parse_bool()
-        if self.next_token == Token.LPARAN.value:
+        if self.next_token == Token.LPAREN.value:
             return self._parse_call_expression()
         if is_number(self.current_token):
             return self._parse_number()
