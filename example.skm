@@ -9,3 +9,5 @@ func int fibonacci(int n) {
 }
 
 out fibonacci(10)
+
+out !(((-1) * (3 + 4)) ^ 2 % 5 > 10)

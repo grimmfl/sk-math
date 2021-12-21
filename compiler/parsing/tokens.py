@@ -17,6 +17,7 @@ class Token(Enum):
     VOID = "void"
     OR = "||"
     AND = "&&"
+    NOT = "!"
     EQ = "=="
     NEQ = "!="
     LEQ = "<="

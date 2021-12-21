@@ -82,6 +82,15 @@ class Executor:
         right_op: p_type = exponentiation.power.execute(self)
         return left_op ** right_op
 
+    def execute_unary_minus(self, unary_minus: "UnaryMinus"):
+        p_type: PythonType = self._get_python_type_from_type(unary_minus.get_type())
+        value: p_type = unary_minus.value.execute(self)
+        return -value
+
+    def execute_not(self, not_expr: "Not"):
+        value: bool = not_expr.value.execute(self)
+        return not value
+
     def execute_identifier_reference(self, reference: "IdentifierReference"):
         return self._table.get_identifier(reference.identifier, reference)
 

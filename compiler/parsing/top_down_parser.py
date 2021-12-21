@@ -244,32 +244,44 @@ class TopDownParser:
     def _parse_expression(self) -> Expression:
         return self._parse_or()
 
-    def _parse_braced(self) -> Expression or None:
+    def _parse_parentheses(self, operation_tokens: List[Token]) -> Expression or None:
         if self.current_token == Token.LPAREN.value:
-            self._accept()
-            x = self._parse_expression()
-            self._accept(Token.RPAREN)
-            return x
+            token_after = self._get_token_after_parenthese()
+            if token_after in [token.value for token in operation_tokens] or len(operation_tokens) == 0:
+                self._accept()
+                x = self._parse_expression()
+                self._accept(Token.RPAREN)
+                return x
         return None
+
+    def _get_token_after_parenthese(self) -> str:
+        s = Stack()
+        for i in range(self._current_token_idx + 1, len(self.tokens)):
+            if self.tokens[i] == Token.LPAREN:
+                s.push(())
+            if self.tokens[i] == Token.RPAREN:
+                if s.is_empty():
+                    return self.tokens[i + 1]
+                s.pop()
 
     def _parse_or(self) -> Expression:
         location = self.current_location
-        x = self._parse_braced()
+        x = self._parse_parentheses([Token.OR])
         x = self._parse_and() if x is None else x
         while self.current_token == Token.OR.value:
             self._accept()
-            y = self._parse_braced()
+            y = self._parse_parentheses([Token.OR])
             y = self._parse_and() if y is None else y
             x = Or(x, y, location)
         return x
 
     def _parse_and(self) -> Expression:
         location = self.current_location
-        x = self._parse_braced()
+        x = self._parse_parentheses([Token.AND])
         x = self._parse_comparison() if x is None else x
         while self.current_token == Token.AND.value:
             self._accept()
-            y = self._parse_braced()
+            y = self._parse_parentheses([Token.AND])
             y = self._parse_comparison() if y is None else y
             x = And(x, y, location)
         return x
@@ -284,64 +296,80 @@ class TopDownParser:
             Token.LE.value: ComparisonType.LESS,
             Token.GE.value: ComparisonType.GREATER,
         }
-        x = self._parse_braced()
+        x = self._parse_parentheses([Token.EQ, Token.NEQ, Token.LEQ, Token.GEQ, Token.LE, Token.GE])
         x = self._parse_add_sub() if x is None else x
         if self.current_token in switch.keys():
             comparison_type: ComparisonType = switch[self.current_token]
             self._accept()
-            y = self._parse_braced()
+            y = self._parse_parentheses([Token.EQ, Token.NEQ, Token.LEQ, Token.GEQ, Token.LE, Token.GE])
             y = self._parse_add_sub() if y is None else y
             x = Comparison(x, y, comparison_type, location)
         return x
 
     def _parse_add_sub(self) -> Expression:
         location = self.current_location
-        x = self._parse_braced()
+        x = self._parse_parentheses([Token.ADD, Token.SUB])
         x = self._parse_mul_div_mod() if x is None else x
         while self.current_token == Token.ADD.value or self.current_token == Token.SUB.value:
             if self.current_token == Token.ADD.value:
                 self._accept()
-                y = self._parse_braced()
+                y = self._parse_parentheses([Token.ADD, Token.SUB])
                 y = self._parse_mul_div_mod() if y is None else y
                 x = Addition(x, y, location)
             else:
                 self._accept()
-                y = self._parse_braced()
+                y = self._parse_parentheses([Token.ADD, Token.SUB])
                 y = self._parse_mul_div_mod() if y is None else y
                 x = Subtraction(x, y, location)
         return x
 
     def _parse_mul_div_mod(self) -> Expression:
         location = self.current_location
-        x = self._parse_braced()
+        x = self._parse_parentheses([Token.MUL, Token.DIV, Token.MOD])
         x = self._parse_exponentiation() if x is None else x
         while self.current_token == Token.MUL.value or self.current_token == Token.DIV.value or self.current_token == Token.MOD.value:
             if self.current_token == Token.MUL.value:
                 self._accept()
-                y = self._parse_braced()
+                y = self._parse_parentheses([Token.MUL, Token.DIV, Token.MOD])
                 y = self._parse_exponentiation() if y is None else y
                 x = Multiplication(x, y, location)
             elif self.current_token == Token.DIV.value:
                 self._accept()
-                y = self._parse_braced()
+                y = self._parse_parentheses([Token.MUL, Token.DIV, Token.MOD])
                 y = self._parse_exponentiation() if y is None else y
                 x = Division(x, y, location)
             else:
                 self._accept()
-                y = self._parse_braced()
+                y = self._parse_parentheses([Token.MUL, Token.DIV, Token.MOD])
                 y = self._parse_exponentiation() if y is None else y
                 x = Modulo(x, y, location)
         return x
 
     def _parse_exponentiation(self) -> Expression:
         location = self.current_location
-        x = self._parse_braced()
-        x = self._parse_atom() if x is None else x
+        x = self._parse_parentheses([Token.EXP])
+        x = self._parse_unary_operators() if x is None else x
         while self.current_token == Token.EXP.value:
             self._accept()
-            y = self._parse_braced()
-            y = self._parse_atom() if y is None else y
+            y = self._parse_parentheses([Token.EXP])
+            y = self._parse_unary_operators() if y is None else y
             x = Exponentiation(x, y, location)
+        return x
+
+    def _parse_unary_operators(self) -> Expression:
+        location = self.current_location
+        if self.current_token == Token.SUB.value:
+            self._accept()
+            x = self._parse_parentheses([])
+            x = self._parse_atom() if x is None else x
+            return UnaryMinus(x, location)
+        if self.current_token == Token.NOT.value:
+            self._accept()
+            x = self._parse_parentheses([])
+            x = self._parse_atom() if x is None else x
+            return Not(x, location)
+        x = self._parse_parentheses([])
+        x = self._parse_atom() if x is None else x
         return x
 
     def _parse_atom(self) -> Expression:
