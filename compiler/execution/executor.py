@@ -123,6 +123,10 @@ class Executor:
             value: PYTHON_PRIMITIVE_TYPE = call.actual_parameters[i].execute(self)
             self._table.add_identifier(identifier, value, call)
         return_value = self._execute_body(definition.body)
+        if isinstance(definition.return_type, ArrayType):
+            formal_size: int = definition.return_type.size.execute(self)
+            if formal_size != len(return_value):
+                raise InvalidArraySizeError(formal_size, len(return_value), call)
         self._table.close_scope()
         return return_value
 
