@@ -28,6 +28,7 @@ The language currently supports the following operations:
 - Modulo ( % )
 - Exponentiation ( ^ )
 - Unary Minus ( - )
+- Arrays
 - Variable Declarations and Assignments
 - Function Definitions and Calls
 - If Statements
@@ -110,6 +111,20 @@ Variables can not be declared more than once in a scope.
 
 Variables need to be declared before a value can be assigned to them.
 If the variable is declared as ```float``` the value needs to be a float too. ```4``` is not a float value.
+
+#### Arrays
+Array Declaration: ```int[4] testArray1, testArray2```
+
+You can declare arrays by naming the element type, followed by the size of the array surrounded by squared brackets.
+
+Array Assignments:
+
+There are different kinds of assignments:
+- Array Assignment: ```testArray1 = [1, 2, 3, 4]```
+- Element Assignment: ```testArray2[0] = 10```
+
+You can also use array elements in an expression: ```testArray1[2] + 25```
+Or you can use the whole array as an expression: ```out testArray1```
 
 #### Function Definition
 ```
