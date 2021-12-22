@@ -80,10 +80,16 @@ class ReturnOutsideOfFunctionError(Exception):
         super(ReturnOutsideOfFunctionError, self).__init__(self.message)
         
         
-class IllegalArraySizeError(Exception):
+class NegativeArraySizeError(Exception):
     def __init__(self, size: int, node: AstNode):
         self.message = f"At {location_str(node.location)}: Expected array size >= 0 - Got {size}."
-        super(IllegalArraySizeError, self).__init__(self.message)
+        super(NegativeArraySizeError, self).__init__(self.message)
+
+
+class InvalidArraySizeError(Exception):
+    def __init__(self, expected: int, got: int, node: AstNode):
+        self.message = f"At {location_str(node.location)}: Expected size {expected} - Got {got}."
+        super(InvalidArraySizeError, self).__init__(self.message)
 
 
 class ArrayIndexOutOfBoundsError(Exception):

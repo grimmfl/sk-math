@@ -12,6 +12,8 @@ func int[5] test() {
     return [1, 2, 3, 4, 5]
 }
 
+bool[4] b
+b = [true, false]
 out fibonacci(10)
 out test()
 out !(((-1) * (3 + 4)) ^ 2 % 5 > 10)

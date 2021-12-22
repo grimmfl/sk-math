@@ -141,7 +141,7 @@ class Executor:
         if isinstance(declaration.type, ArrayType):
             size: int = declaration.type.size.execute(self)
             if size < 0:
-                raise IllegalArraySizeError(size, declaration)
+                raise NegativeArraySizeError(size, declaration)
             none_array: list = [None for x in range(0, size)]
             value = none_array
         for identifier in declaration.identifiers:
@@ -154,7 +154,7 @@ class Executor:
             value: list = value
             old_array = self._table.get_identifier(assignment.identifier, assignment)
             if len(old_array) != len(value):
-                raise IllegalArraySizeError(len(value), assignment)
+                raise InvalidArraySizeError(len(old_array), len(value), assignment)
         self._table.update_identifier(assignment.identifier, value, assignment)
 
     def execute_array_element_assignment(self, assignment: "ArrayElementAssignment"):
@@ -187,4 +187,4 @@ class Executor:
 
 from compiler.ast.ast import *
 from compiler.identification_table import IdentificationTable
-from compiler.errors import IllegalArraySizeError, ArrayIndexOutOfBoundsError
+from compiler.errors import NegativeArraySizeError, ArrayIndexOutOfBoundsError, InvalidArraySizeError
