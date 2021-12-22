@@ -2,18 +2,6 @@ from enum import Enum
 from typing import List
 
 
-#class Type(Enum):
-#    INT = "int"
-#    FLOAT = "float"
-#    BOOL = "bool"
-#    ARRAY = "array"
-#
-#    def is_primitive(self) -> bool:
-#        return self == Type.INT or self == Type.FLOAT or self == Type.BOOL
-#
-#    def is_numeric(self) -> bool:
-#        return self == Type.INT or self == Type.FLOAT
-
 class ReturnType:
     def __init__(self, name):
         self.name: str = name
@@ -81,13 +69,6 @@ class ArrayType(Type):
         return str(self.element_type) + "[]"
 
 
-#class ReturnType(Enum):
-#    INT = "int"
-#    FLOAT = "float"
-#    BOOL = "bool"
-#    VOID = "void"
-
-
 class ComparisonType(Enum):
     EQUAL = "=="
     NOT_EQUAL = "!="
@@ -97,8 +78,8 @@ class ComparisonType(Enum):
     GREATER = ">"
 
 
-NUMERIC_TYPES = [IntType, FloatType]
-PRIMITIVE_TYPES: List[PrimitiveType] = NUMERIC_TYPES + [BoolType]
+NUMERIC_TYPES = [IntType(), FloatType()]
+PRIMITIVE_TYPES: List[PrimitiveType] = NUMERIC_TYPES + [BoolType()]
 
 PYTHON_PRIMITIVE_TYPE = int or float or bool
 PYTHON_TYPE = PYTHON_PRIMITIVE_TYPE or list
