@@ -207,9 +207,8 @@ class Visitor:
             actual_type: ArrayType = actual_type
             self._check_type(assignment, declaration.type.element_type, actual_type.element_type)
         else:
-            declaration_type: Type = self._table.get_identifier(assignment.identifier, assignment).type
             actual_type: Type = assignment.value.visit(self)
-            self._check_type(assignment, declaration_type, actual_type)
+            self._check_type(assignment, declaration.type, actual_type)
 
     def visit_array_element_assignment(self, assignment: "ArrayElementAssignment"):
         declaration: VariableDeclaration = self._table.get_identifier(assignment.identifier, assignment)
