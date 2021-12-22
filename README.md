@@ -182,9 +182,9 @@ The language is based on the following grammar:
 - ElifStatement ::= 'elif' '(' Expr ')' '{' Body '}'
 - ElseStatement ::= 'else' '{' Body '}'
 - ReturnStatement ::= 'return' Expr
-- VarDecl ::= ArrayDecl | (Type ID (',' ID)*)
-- ArrayDecl ::= Type '\[' Expr '\]' ID (',' ID)*
-- VarAssign ::= ID '=' Expr
+- VarDecl ::= Type ID (',' ID)*
+- VarAssign ::= (ID '=' Expr) | ArrayElementAssign
+- ArrayElementAssign ::= ID '\[' Expr '\]' = Expr
 - Out ::= 'out' Expr
 - Expr ::= Or
 - Or ::= And ( '||' And )*
@@ -194,5 +194,7 @@ The language is based on the following grammar:
 - AddSub ::= MulDiv ( ( '+' | '-' ) MulDiv )*
 - MulDiv ::= Exponentiation ( ( '\*' | '/' ) Exponentiation )*
 - Exponentiation ::= Atom ( '^' Atom )*
-- Type ::= 'int' | 'float' | 'bool'
+- Type ::= ('int' | 'float' | 'bool') (Ɛ | '\[' Expr '\]')
 - Atom ::= INT | FLOAT | ID | FuncCall | 'true' | 'false'
+- Array ::= '\[' (Ɛ | (Expr (',' Expr)*)) '\]'
+- ArrayElementSelection ::= ID '\[' Expr '\]'
