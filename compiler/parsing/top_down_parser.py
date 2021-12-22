@@ -5,7 +5,6 @@ from compiler.errors import SyntaxError
 from compiler.parsing.tokens import Token
 from helpers import Stack, is_number
 
-#OPS = ["*", "/", "+", "-", "^", ",", "var", "out", "=", "(", ")", "{", "}", "return", "func"]
 OPS = [Token.__dict__.get(t).value for t in filter(lambda x: not x.startswith("_"), Token.__dict__.keys())]
 
 
@@ -188,11 +187,23 @@ class TopDownParser:
         return parameters
 
     def _parse_variable_assignment(self) -> VariableAssignment:
+        if self.next_token == Token.LSQBR.value:
+            return self._parse_array_element_assignment()
         location = self.current_location
         name: str = self._parse_name()
         self._accept(Token.ASSIGN)
         value: Expression = self._parse_expression()
         return VariableAssignment(name, value, location)
+
+    def _parse_array_element_assignment(self) -> ArrayElementAssignment:
+        location = self.current_location
+        name: str = self._parse_name()
+        self._accept(Token.LSQBR)
+        index: Expression = self._parse_expression()
+        self._accept(Token.RSQBR)
+        self._accept(Token.ASSIGN)
+        value: Expression = self._parse_expression()
+        return ArrayElementAssignment(name, index, value, location)
 
     def _parse_function_definition(self) -> FunctionDefinition:
         location = self.current_location
@@ -217,10 +228,11 @@ class TopDownParser:
         return statements
 
     def _parse_formal_parameters(self) -> List[FormalParameter]:
-        parameters: List[FormalParameter] = [self._parse_formal_parameter()]
-        while self.current_token == Token.COMMA.value:
-            self._accept()
+        parameters: List[FormalParameter] = []
+        while self.current_token != Token.RPAREN.value:
             parameters.append(self._parse_formal_parameter())
+            if self.current_token != Token.RPAREN.value:
+                self._accept(Token.COMMA)
         return parameters
 
     def _parse_formal_parameter(self) -> FormalParameter:
@@ -230,16 +242,10 @@ class TopDownParser:
         return FormalParameter(type, name, location)
 
     def _parse_return_type(self) -> ReturnType:
-        switch = {
-            Token.INT.value: ReturnType.INT,
-            Token.FLOAT.value: ReturnType.FLOAT,
-            Token.VOID.value: ReturnType.VOID,
-        }
-        if self.current_token in switch.keys():
-            return_type: ReturnType = switch[self.current_token]
+        if self.current_token == Token.VOID.value:
             self._accept()
-            return return_type
-        raise SyntaxError([Token.INT, Token.FLOAT, Token.VOID], self.current_token, self.current_location)
+            return VoidType()
+        return self._parse_type()
 
     def _parse_expression(self) -> Expression:
         return self._parse_or()
@@ -373,6 +379,10 @@ class TopDownParser:
         return x
 
     def _parse_atom(self) -> Expression:
+        if self.current_token == Token.LSQBR.value:
+            return self._parse_array()
+        if self.next_token == Token.LSQBR.value:
+            return self._parse_array_element_selection()
         if self.current_token == Token.TRUE.value or self.current_token == Token.FALSE.value:
             return self._parse_bool()
         if self.next_token == Token.LPAREN.value:
@@ -380,6 +390,25 @@ class TopDownParser:
         if is_number(self.current_token):
             return self._parse_number()
         return self._parse_identifier()
+
+    def _parse_array_element_selection(self) -> Expression:
+        location = self.current_location
+        identifier: str = self._parse_name()
+        self._accept(Token.LSQBR)
+        count: Expression = self._parse_expression()
+        self._accept(Token.RSQBR)
+        return ArrayElementSelection(identifier, count, location)
+
+    def _parse_array(self) -> Expression:
+        location = self.current_location
+        self._accept(Token.LSQBR)
+        elements: List[Expression] = []
+        while self.current_token != Token.RSQBR.value:
+            elements.append(self._parse_expression())
+            if self.current_token != Token.RSQBR.value:
+                self._accept(Token.COMMA)
+        self._accept(Token.RSQBR)
+        return Array(elements, location)
 
     def _parse_bool(self) -> Expression:
         location = self.current_location
@@ -414,15 +443,21 @@ class TopDownParser:
     def _parse_type(self) -> Type:
         if self.current_token == Token.INT.value:
             self._accept()
-            return Type.INT
+            type = IntType()
         elif self.current_token == Token.FLOAT.value:
             self._accept()
-            return Type.FLOAT
+            type = FloatType()
         elif self.current_token == Token.BOOL.value:
             self._accept()
-            return Type.BOOL
+            type = BoolType()
         else:
-            raise SyntaxError([Token.INT, Token.FLOAT], self.current_token, self.current_location)
+            raise SyntaxError([Token.INT, Token.FLOAT, Token.BOOL], self.current_token, self.current_location)
+        if self.current_token == Token.LSQBR.value:
+            self._accept()
+            size: Expression = self._parse_expression()
+            self._accept(Token.RSQBR)
+            return ArrayType(type, size)
+        return type
 
 
 if __name__ == "__main__":

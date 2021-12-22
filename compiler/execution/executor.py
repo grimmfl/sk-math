@@ -1,20 +1,10 @@
-import ctypes.wintypes
-from typing import Type as PythonType
 from typing import List
+from typing import Type as PythonType
 
 
 class Executor:
     def __init__(self):
-        self._table: IdentificationTable = IdentificationTable[PYTHON_PRIMITIVE_TYPE]()
-
-    @staticmethod
-    def _get_python_type_from_type(type: "Type") -> PythonType:
-        switch = {
-            Type.INT: int,
-            Type.FLOAT: float,
-            Type.BOOL: bool,
-        }
-        return switch[type]
+        self._table: IdentificationTable = IdentificationTable[PYTHON_TYPE]()
 
     def execute_module(self, module: "Module"):
         self._table.open_scope()
@@ -33,7 +23,7 @@ class Executor:
         return left_op and right_op
 
     def execute_comparison(self, comparison: "Comparison"):
-        p_type: PythonType = self._get_python_type_from_type(comparison.get_type())
+        p_type: PythonType = comparison.get_type().python_type
         left_op: p_type = comparison.left_operand.execute(self)
         right_op: p_type = comparison.right_operand.execute(self)
         switch = {
@@ -47,43 +37,43 @@ class Executor:
         return switch[comparison.comparison_type](left_op, right_op)
 
     def execute_addition(self, addition: "Addition"):
-        p_type: PythonType = self._get_python_type_from_type(addition.get_type())
+        p_type: PythonType = addition.get_type().python_type
         left_op: p_type = addition.left_operand.execute(self)
         right_op: p_type = addition.right_operand.execute(self)
         return left_op + right_op
 
     def execute_subtraction(self, subtraction: "Subtraction"):
-        p_type: PythonType = self._get_python_type_from_type(subtraction.get_type())
+        p_type: PythonType = subtraction.get_type().python_type
         left_op: p_type = subtraction.left_operand.execute(self)
         right_op: p_type = subtraction.right_operand.execute(self)
         return left_op - right_op
 
     def execute_multiplication(self, multiplication: "Multiplication"):
-        p_type: PythonType = self._get_python_type_from_type(multiplication.get_type())
+        p_type: PythonType = multiplication.get_type().python_type
         left_op: p_type = multiplication.left_operand.execute(self)
         right_op: p_type = multiplication.right_operand.execute(self)
         return left_op * right_op
 
     def execute_division(self, division: "Division"):
-        p_type: PythonType = self._get_python_type_from_type(division.get_type())
+        p_type: PythonType = division.get_type().python_type
         left_op: p_type = division.left_operand.execute(self)
         right_op: p_type = division.right_operand.execute(self)
         return left_op / right_op
 
     def execute_modulo(self, modulo: "Modulo"):
-        p_type: PythonType = self._get_python_type_from_type(modulo.get_type())
+        p_type: PythonType = modulo.get_type().python_type
         left_op: p_type = modulo.left_operand.execute(self)
         right_op: p_type = modulo.right_operand.execute(self)
         return left_op % right_op
 
     def execute_exponentiation(self, exponentiation: "Exponentiation"):
-        p_type: PythonType = self._get_python_type_from_type(exponentiation.get_type())
+        p_type: PythonType = exponentiation.get_type().python_type
         left_op: p_type = exponentiation.base.execute(self)
         right_op: p_type = exponentiation.power.execute(self)
         return left_op ** right_op
 
     def execute_unary_minus(self, unary_minus: "UnaryMinus"):
-        p_type: PythonType = self._get_python_type_from_type(unary_minus.get_type())
+        p_type: PythonType = unary_minus.get_type().python_type
         value: p_type = unary_minus.value.execute(self)
         return -value
 
@@ -93,6 +83,19 @@ class Executor:
 
     def execute_identifier_reference(self, reference: "IdentifierReference"):
         return self._table.get_identifier(reference.identifier, reference)
+
+    def execute_array_element_selection(self, selection: "ArrayElementSelection"):
+        array: list = self._table.get_identifier(selection.identifier, selection)
+        index: int = selection.index.execute(self)
+        if index < 0 or index >= len(array):
+            raise ArrayIndexOutOfBoundsError
+        return array[index]
+
+    def execute_array(self, array: "Array"):
+        value = []
+        for element in array.elements:
+            value.append(element.execute(self))
+        return value
 
     def execute_constant(self, constant: "Constant"):
         return constant.value
@@ -120,6 +123,10 @@ class Executor:
             value: PYTHON_PRIMITIVE_TYPE = call.actual_parameters[i].execute(self)
             self._table.add_identifier(identifier, value, call)
         return_value = self._execute_body(definition.body)
+        if isinstance(definition.return_type, ArrayType):
+            formal_size: int = definition.return_type.size.execute(self)
+            if formal_size != len(return_value):
+                raise InvalidArraySizeError(formal_size, len(return_value), call)
         self._table.close_scope()
         return return_value
 
@@ -134,15 +141,37 @@ class Executor:
         return expression.function(value)
 
     def execute_variable_declaration(self, declaration: "VariableDeclaration"):
+        value = None
+        if isinstance(declaration.type, ArrayType):
+            size: int = declaration.type.size.execute(self)
+            if size < 0:
+                raise NegativeArraySizeError(size, declaration)
+            none_array: list = [None for x in range(0, size)]
+            value = none_array
         for identifier in declaration.identifiers:
-            self._table.add_identifier(identifier, None, declaration)
+            self._table.add_identifier(identifier, value, declaration)
 
     def execute_variable_assignment(self, assignment: "VariableAssignment"):
-        value: PYTHON_PRIMITIVE_TYPE = assignment.value.execute(self)
+        value: PYTHON_TYPE = assignment.value.execute(self)
+        value_type: Type = assignment.value.get_type()
+        if isinstance(value_type, ArrayType):
+            value: list = value
+            old_array = self._table.get_identifier(assignment.identifier, assignment)
+            if len(old_array) != len(value):
+                raise InvalidArraySizeError(len(old_array), len(value), assignment)
         self._table.update_identifier(assignment.identifier, value, assignment)
 
+    def execute_array_element_assignment(self, assignment: "ArrayElementAssignment"):
+        array: list = self._table.get_identifier(assignment.identifier, assignment)
+        index: int = assignment.index.execute(self)
+        if index < 0 or index >= len(array):
+            raise ArrayIndexOutOfBoundsError
+        value: PYTHON_PRIMITIVE_TYPE = assignment.value.execute(self)
+        array[index] = value
+        self._table.update_identifier(assignment.identifier, array, assignment)
+
     def execute_out_statement(self, out: "OutStatement"):
-        value: PYTHON_PRIMITIVE_TYPE = out.expression.execute(self)
+        value: PYTHON_TYPE = out.expression.execute(self)
         print(self._to_output(value))
 
     def execute_function_call(self, call: "FunctionCall"):
@@ -152,7 +181,9 @@ class Executor:
         return statement.expression.execute(self)
 
     @staticmethod
-    def _to_output(value: "PYTHON_PRIMITIVE_TYPE") -> str:
+    def _to_output(value: "PYTHON_TYPE") -> str:
+        if type(value) is list:
+            return "[" + ", ".join(Executor._to_output(element) for element in value) + "]"
         if type(value) is bool:
             return "true" if value else "false"
         return str(value)
@@ -160,3 +191,4 @@ class Executor:
 
 from compiler.ast.ast import *
 from compiler.identification_table import IdentificationTable
+from compiler.errors import NegativeArraySizeError, ArrayIndexOutOfBoundsError, InvalidArraySizeError

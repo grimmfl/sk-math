@@ -1,7 +1,5 @@
 from typing import Tuple, List, Any, Callable
 
-from compiler.ast.types import *
-
 
 class AstNode:
     def __init__(self, location: Tuple[int, int]):
@@ -68,10 +66,10 @@ class Expression(AstNode):
     def is_type_set(self) -> bool:
         return self._type is None
 
-    def set_type(self, type: Type):
+    def set_type(self, type: "Type"):
         self._type = type
 
-    def get_type(self) -> Type:
+    def get_type(self) -> "Type":
         return self._type
 
 
@@ -102,7 +100,7 @@ class And(Expression):
 
 
 class Comparison(Expression):
-    def __init__(self, left_operand: Expression, right_operand: Expression, type: ComparisonType,
+    def __init__(self, left_operand: Expression, right_operand: Expression, type: "ComparisonType",
                  location: Tuple[int, int]):
         self.left_operand: Expression = left_operand
         self.right_operand: Expression = right_operand
@@ -230,9 +228,33 @@ class IdentifierReference(Expression):
         return executor_instance.execute_identifier_reference(self)
 
 
+class ArrayElementSelection(IdentifierReference):
+    def __init__(self, identifier: str, index: Expression, location: Tuple[int, int]):
+        self.index = index
+        super().__init__(identifier, location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_array_element_selection(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_array_element_selection(self)
+
+
+class Array(Expression):
+    def __init__(self, elements: List[Expression], location: Tuple[int, int]):
+        self.elements: List[Expression] = elements
+        super().__init__(location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_array(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_array(self)
+
+
 class Constant(Expression):
-    def __init__(self, value: PYTHON_PRIMITIVE_TYPE, location: Tuple[int, int]):
-        self.value: int or float = value
+    def __init__(self, value: "PYTHON_PRIMITIVE_TYPE", location: Tuple[int, int]):
+        self.value: PYTHON_PRIMITIVE_TYPE = value
         super().__init__(location)
 
     def visit(self, visitor_instance: "Visitor"):
@@ -243,7 +265,7 @@ class Constant(Expression):
 
 
 class FormalParameter(AstNode):
-    def __init__(self, type: Type, identifier: str, location: Tuple[int, int]):
+    def __init__(self, type: "Type", identifier: str, location: Tuple[int, int]):
         self.type: Type = type
         self.identifier: str = identifier
         super().__init__(location)
@@ -256,7 +278,7 @@ class FormalParameter(AstNode):
 
 
 class FunctionDefinition(Statement):
-    def __init__(self, name: str, return_type: ReturnType, formal_parameters: List[FormalParameter],
+    def __init__(self, name: str, return_type: "ReturnType", formal_parameters: List[FormalParameter],
                  body: List[Statement],
                  location: Tuple[int, int]):
         self.name: str = name
@@ -328,7 +350,7 @@ class IfStatement(Statement):
 
 
 class VariableDeclaration(SimpleStatement):
-    def __init__(self, type: Type, identifiers: List[str], location: Tuple[int, int]):
+    def __init__(self, type: "Type", identifiers: List[str], location: Tuple[int, int]):
         self.type: Type = type
         self.identifiers: List[str] = identifiers
         super().__init__(location)
@@ -351,6 +373,18 @@ class VariableAssignment(SimpleStatement):
 
     def execute(self, executor_instance: "Executor"):
         return executor_instance.execute_variable_assignment(self)
+
+
+class ArrayElementAssignment(VariableAssignment):
+    def __init__(self, identifier: str, index: Expression, value: Expression, location: Tuple[int, int]):
+        self.index: Expression = index
+        super().__init__(identifier, value, location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_array_element_assignment(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_array_element_assignment(self)
 
 
 class OutStatement(SimpleStatement):
@@ -384,10 +418,10 @@ class ReturnStatement(SimpleStatement):
 
         self._return_type: ReturnType = None
 
-    def set_return_type(self, return_type: ReturnType):
+    def set_return_type(self, return_type: "ReturnType"):
         self._return_type = return_type
 
-    def get_return_type(self) -> ReturnType:
+    def get_return_type(self) -> "ReturnType":
         return self._return_type
 
     def is_return_type_set(self) -> bool:
@@ -402,3 +436,4 @@ class ReturnStatement(SimpleStatement):
 
 from compiler.contextual_analysis.visitor import Visitor
 from compiler.execution.executor import Executor
+from compiler.ast.types import *

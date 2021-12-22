@@ -1,16 +1,10 @@
-import typing_extensions
-
-from compiler.errors import *
-from compiler.ast.ast import *
-
-
 class Visitor:
     def __init__(self):
-        self._table = IdentificationTable[Type]()
+        self._table = IdentificationTable[VariableDeclaration or FormalParameter]()
         self._currently_in_function = False
 
     @staticmethod
-    def _check_type(node: "AstNode", type1: Type, type2: Type):
+    def _check_type(node: "AstNode", type1: "Type", type2: "Type"):
         if type1 != type2:
             raise TypeError(node, type1, type2)
 
@@ -20,23 +14,23 @@ class Visitor:
             statement.visit(self)
         self._table.close_scope()
 
-    def visit_or(self, or_expr: "Or") -> Type:
+    def visit_or(self, or_expr: "Or") -> "Type":
         l_type: Type = or_expr.left_operand.visit(self)
         r_type: Type = or_expr.right_operand.visit(self)
-        self._check_type(or_expr, Type.BOOL, l_type)
-        self._check_type(or_expr, Type.BOOL, r_type)
-        or_expr.set_type(Type.BOOL)
-        return Type.BOOL
+        self._check_type(or_expr, BoolType(), l_type)
+        self._check_type(or_expr, BoolType(), r_type)
+        or_expr.set_type(BoolType())
+        return BoolType()
 
-    def visit_and(self, and_expr: "And") -> Type:
+    def visit_and(self, and_expr: "And") -> "Type":
         l_type: Type = and_expr.left_operand.visit(self)
         r_type: Type = and_expr.right_operand.visit(self)
-        self._check_type(and_expr, Type.BOOL, l_type)
-        self._check_type(and_expr, Type.BOOL, r_type)
-        and_expr.set_type(Type.BOOL)
-        return Type.BOOL
+        self._check_type(and_expr, BoolType(), l_type)
+        self._check_type(and_expr, BoolType(), r_type)
+        and_expr.set_type(BoolType())
+        return BoolType()
 
-    def visit_comparison(self, comparison: "Comparison") -> Type:
+    def visit_comparison(self, comparison: "Comparison") -> "Type":
         l_type: Type = comparison.left_operand.visit(self)
         r_type: Type = comparison.right_operand.visit(self)
         if not l_type.is_numeric():
@@ -44,10 +38,10 @@ class Visitor:
         if not r_type.is_numeric():
             raise TypeError(comparison, NUMERIC_TYPES, r_type)
         self._check_type(comparison, l_type, r_type)
-        comparison.set_type(Type.BOOL)
-        return Type.BOOL
+        comparison.set_type(BoolType())
+        return BoolType()
 
-    def visit_addition(self, addition: "Addition") -> Type:
+    def visit_addition(self, addition: "Addition") -> "Type":
         l_type: Type = addition.left_operand.visit(self)
         r_type: Type = addition.right_operand.visit(self)
         if not l_type.is_numeric():
@@ -58,7 +52,7 @@ class Visitor:
         addition.set_type(l_type)
         return l_type
 
-    def visit_subtraction(self, subtraction: "Subtraction") -> Type:
+    def visit_subtraction(self, subtraction: "Subtraction") -> "Type":
         l_type: Type = subtraction.left_operand.visit(self)
         r_type: Type = subtraction.right_operand.visit(self)
         if not l_type.is_numeric():
@@ -69,7 +63,7 @@ class Visitor:
         subtraction.set_type(l_type)
         return l_type
 
-    def visit_multiplication(self, multiplication: "Multiplication") -> Type:
+    def visit_multiplication(self, multiplication: "Multiplication") -> "Type":
         l_type: Type = multiplication.left_operand.visit(self)
         r_type: Type = multiplication.right_operand.visit(self)
         if not l_type.is_numeric():
@@ -80,7 +74,7 @@ class Visitor:
         multiplication.set_type(l_type)
         return l_type
 
-    def visit_division(self, division: "Division") -> Type:
+    def visit_division(self, division: "Division") -> "Type":
         l_type: Type = division.left_operand.visit(self)
         r_type: Type = division.right_operand.visit(self)
         if not l_type.is_numeric():
@@ -91,15 +85,15 @@ class Visitor:
         division.set_type(l_type)
         return l_type
 
-    def visit_modulo(self, modulo: "Modulo") -> Type:
+    def visit_modulo(self, modulo: "Modulo") -> "Type":
         l_type: Type = modulo.left_operand.visit(self)
         r_type: Type = modulo.right_operand.visit(self)
-        self._check_type(modulo, Type.INT, l_type)
-        self._check_type(modulo, Type.INT, r_type)
-        modulo.set_type(Type.INT)
-        return Type.INT
+        self._check_type(modulo, IntType(), l_type)
+        self._check_type(modulo, IntType(), r_type)
+        modulo.set_type(IntType())
+        return IntType()
 
-    def visit_exponentiation(self, exponentiation: "Exponentiation") -> Type:
+    def visit_exponentiation(self, exponentiation: "Exponentiation") -> "Type":
         l_type: Type = exponentiation.base.visit(self)
         r_type: Type = exponentiation.power.visit(self)
         if not l_type.is_numeric():
@@ -110,54 +104,65 @@ class Visitor:
         exponentiation.set_type(l_type)
         return l_type
 
-    def visit_unary_minus(self, unary_minus: "UnaryMinus") -> Type:
+    def visit_unary_minus(self, unary_minus: "UnaryMinus") -> "Type":
         type: Type = unary_minus.value.visit(self)
         if not type.is_numeric():
             raise TypeError(unary_minus, NUMERIC_TYPES, type)
         unary_minus.set_type(type)
         return type
 
-    def visit_not(self, not_expr: "Not") -> Type:
+    def visit_not(self, not_expr: "Not") -> "Type":
         type: Type = not_expr.value.visit(self)
-        self._check_type(not_expr, Type.BOOL, type)
-        not_expr.set_type(Type.BOOL)
-        return Type.BOOL
+        self._check_type(not_expr, BoolType(), type)
+        not_expr.set_type(BoolType())
+        return BoolType()
 
-    def visit_identifier_reference(self, reference: "IdentifierReference") -> Type:
-        type: Type = self._table.get_identifier(reference.identifier, reference)
+    def visit_identifier_reference(self, reference: "IdentifierReference") -> "Type":
+        type: Type = self._table.get_identifier(reference.identifier, reference).type
         reference.set_type(type)
         return type
 
-    def visit_constant(self, constant: "Constant") -> Type:
+    def visit_array_element_selection(self, selection: "ArrayElementSelection") -> "Type":
+        self._check_type(selection, IntType(), selection.index.visit(self))
+        type: Type = self._table.get_identifier(selection.identifier, selection).type
+        selection.set_type(type)
+        return type
+
+    def visit_array(self, array: "Array") -> "Type":
+        element_type: Type = None
+        if len(array.elements) >= 1:
+            element_type = array.elements[0].visit(self)
+        if len(array.elements) > 1:
+            for element in array.elements[1:]:
+                self._check_type(array, element_type, element.visit(self))
+        type: ArrayType = ArrayType(element_type, Constant(len(array.elements), array.location))
+        array.set_type(type)
+        return type
+
+    def visit_constant(self, constant: "Constant") -> "Type":
         switch = {
-            float: Type.FLOAT,
-            int: Type.INT,
-            bool: Type.BOOL
+            float: FloatType(),
+            int: IntType(),
+            bool: BoolType()
         }
         constant.set_type(switch[type(constant.value)])
         return switch[type(constant.value)]
 
-    def visit_call_expression(self, expression: "CallExpression") -> Type:
+    def visit_call_expression(self, expression: "CallExpression") -> "Type":
         definition: FunctionDefinition = self._table.get_function(expression.name, expression)
         if len(expression.actual_parameters) != len(definition.formal_parameters):
-            raise ArgumentCountError(definition.formal_parameters, expression.actual_parameters)
+            raise ArgumentCountError(len(definition.formal_parameters), len(expression.actual_parameters), expression)
         for i in range(0, len(definition.formal_parameters)):
             formal_type: Type = definition.formal_parameters[i].type
             actual_type: Type = expression.actual_parameters[i].visit(self)
             self._check_type(expression, formal_type, actual_type)
-        switch = {
-            ReturnType.VOID: None,
-            ReturnType.INT: Type.INT,
-            ReturnType.FLOAT: Type.FLOAT,
-            ReturnType.BOOL: Type.BOOL,
-        }
-        type: Type = switch[definition.return_type]
+        type: Type = definition.return_type if isinstance(definition.return_type, Type) else None
         expression.set_type(type)
         expression.set_function_definition(definition)
         return type
 
     def visit_formal_parameter(self, formal_parameter: "FormalParameter"):
-        self._table.add_identifier(formal_parameter.identifier, formal_parameter.type, formal_parameter)
+        self._table.add_identifier(formal_parameter.identifier, formal_parameter, formal_parameter)
 
     def visit_function_definition(self, function_definition: "FunctionDefinition"):
         self._currently_in_function = True
@@ -170,7 +175,7 @@ class Visitor:
             statement.visit(self)
             if isinstance(statement, ReturnStatement):
                 return_statements.append(statement)
-        if function_definition.return_type == ReturnType.VOID and len(return_statements) > 0:
+        if function_definition.return_type == VoidType() and len(return_statements) > 0:
             raise VoidFunctionReturnError(function_definition.name, function_definition)
         for statement in return_statements:
             type: ReturnType = statement.get_return_type()
@@ -182,7 +187,7 @@ class Visitor:
 
     def visit_if_statement(self, if_statement: "IfStatement"):
         cond_type: Type = if_statement.condition.visit(self)
-        self._check_type(if_statement, Type.BOOL, cond_type)
+        self._check_type(if_statement, BoolType(), cond_type)
         for statement in if_statement.body:
             statement.visit(self)
         for elif_statement in if_statement.elifs:
@@ -192,12 +197,27 @@ class Visitor:
 
     def visit_variable_declaration(self, declaration: "VariableDeclaration"):
         for identifier in declaration.identifiers:
-            self._table.add_identifier(identifier, declaration.type, declaration)
+            self._table.add_identifier(identifier, declaration, declaration)
 
     def visit_variable_assignment(self, assignment: "VariableAssignment"):
-        declaration_type: Type = self._table.get_identifier(assignment.identifier, assignment)
-        actual_type: Type = assignment.value.visit(self)
-        self._check_type(assignment, declaration_type, actual_type)
+        declaration: VariableDeclaration = self._table.get_identifier(assignment.identifier, assignment)
+        if isinstance(declaration.type, ArrayType):
+            actual_type = assignment.value.visit(self)
+            self._check_type(assignment, declaration.type, actual_type)
+            actual_type: ArrayType = actual_type
+            self._check_type(assignment, declaration.type.element_type, actual_type.element_type)
+        else:
+            actual_type: Type = assignment.value.visit(self)
+            self._check_type(assignment, declaration.type, actual_type)
+
+    def visit_array_element_assignment(self, assignment: "ArrayElementAssignment"):
+        declaration: VariableDeclaration = self._table.get_identifier(assignment.identifier, assignment)
+        self._check_type(assignment, ArrayType(), declaration.type)
+        if isinstance(declaration.type, ArrayType):
+            value_type: Type = assignment.value.visit(self)
+            index_type: Type = assignment.index.visit(self)
+            self._check_type(assignment, declaration.type.element_type, value_type)
+            self._check_type(assignment, IntType(), index_type)
 
     def visit_out_statement(self, statement: "OutStatement"):
         statement.expression.visit(self)
@@ -209,13 +229,10 @@ class Visitor:
         if not self._currently_in_function:
             raise ReturnOutsideOfFunctionError(statement)
         type: Type = statement.expression.visit(self)
-        switch = {
-            Type.INT: ReturnType.INT,
-            Type.FLOAT: ReturnType.FLOAT,
-            Type.BOOL: ReturnType.BOOL,
-        }
-        statement.set_return_type(switch[type])
-        return switch[type]
+        statement.set_return_type(type)
+        return type
 
 
 from compiler.identification_table import IdentificationTable
+from compiler.errors import *
+from compiler.ast.ast import *

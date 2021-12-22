@@ -21,8 +21,8 @@ class SyntaxError(Exception):
 
 class TypeError(Exception):
     def __init__(self, node: AstNode, expected: Type or List[Type], got: Type):
-        expected_str: str = " or ".join(str(token) for token in expected) if type(expected) == list else expected
-        self.message = f"At {location_str(node.location)}: Expected {expected_str} - Got {got}"
+        expected_str: str = " or ".join(str(token) for token in expected) if type(expected) == list else str(expected)
+        self.message = f"At {location_str(node.location)}: Expected type {expected_str} - Got type {str(got)}"
         super(TypeError, self).__init__(self.message)
 
 
@@ -58,7 +58,7 @@ class FunctionNotDefinedError(Exception):
 
 class VoidFunctionReturnError(Exception):
     def __init__(self, name: str, node: AstNode):
-        self.message = f"At {location_str(node.location)}: Void function {name} should not contain a return statement."
+        self.message = f"At {location_str(node.location)}: VoidType function {name} should not contain a return statement."
         super(VoidFunctionReturnError, self).__init__(self.message)
 
 
@@ -78,3 +78,21 @@ class ReturnOutsideOfFunctionError(Exception):
     def __init__(self, node: AstNode):
         self.message = f"At {location_str(node.location)}: Return statement is not allowed outside of a function."
         super(ReturnOutsideOfFunctionError, self).__init__(self.message)
+        
+        
+class NegativeArraySizeError(Exception):
+    def __init__(self, size: int, node: AstNode):
+        self.message = f"At {location_str(node.location)}: Expected array size >= 0 - Got size {size}."
+        super(NegativeArraySizeError, self).__init__(self.message)
+
+
+class InvalidArraySizeError(Exception):
+    def __init__(self, expected: int, got: int, node: AstNode):
+        self.message = f"At {location_str(node.location)}: Expected size {expected} - Got size {got}."
+        super(InvalidArraySizeError, self).__init__(self.message)
+
+
+class ArrayIndexOutOfBoundsError(Exception):
+    def __init__(self, index: int, node: AstNode):
+        self.message = f"At {location_str(node.location)}: Index {index} out of bounds."
+        super(ArrayIndexOutOfBoundsError, self).__init__(self.message)
