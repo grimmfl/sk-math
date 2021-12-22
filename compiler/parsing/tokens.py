@@ -31,6 +31,8 @@ class Token(Enum):
     FUNC = "func"
     LPAREN = "("
     RPAREN = ")"
+    LSQBR = "["
+    RSQBR = "]"
     LBRACE = "{"
     RBRACE = "}"
     RETURN = "return"

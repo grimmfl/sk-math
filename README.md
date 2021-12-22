@@ -182,7 +182,8 @@ The language is based on the following grammar:
 - ElifStatement ::= 'elif' '(' Expr ')' '{' Body '}'
 - ElseStatement ::= 'else' '{' Body '}'
 - ReturnStatement ::= 'return' Expr
-- VarDecl ::= Type ID (',' ID)*
+- VarDecl ::= ArrayDecl | (Type ID (',' ID)*)
+- ArrayDecl ::= Type '\[' Expr '\]' ID (',' ID)*
 - VarAssign ::= ID '=' Expr
 - Out ::= 'out' Expr
 - Expr ::= Or
