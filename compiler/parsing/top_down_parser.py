@@ -228,10 +228,11 @@ class TopDownParser:
         return statements
 
     def _parse_formal_parameters(self) -> List[FormalParameter]:
-        parameters: List[FormalParameter] = [self._parse_formal_parameter()]
-        while self.current_token == Token.COMMA.value:
-            self._accept()
+        parameters: List[FormalParameter] = []
+        while self.current_token != Token.RPAREN.value:
             parameters.append(self._parse_formal_parameter())
+            if self.current_token != Token.RPAREN.value:
+                self._accept(Token.COMMA)
         return parameters
 
     def _parse_formal_parameter(self) -> FormalParameter:
@@ -241,17 +242,10 @@ class TopDownParser:
         return FormalParameter(type, name, location)
 
     def _parse_return_type(self) -> ReturnType:
-        switch = {
-            Token.INT.value: IntType(),
-            Token.FLOAT.value: FloatType(),
-            Token.BOOL.value: BoolType(),
-            Token.VOID.value: VoidType(),
-        }
-        if self.current_token in switch.keys():
-            return_type: ReturnType = switch[self.current_token]
+        if self.current_token == Token.VOID.value:
             self._accept()
-            return return_type
-        raise SyntaxError([Token.INT, Token.FLOAT, Token.VOID], self.current_token, self.current_location)
+            return VoidType()
+        return self._parse_type()
 
     def _parse_expression(self) -> Expression:
         return self._parse_or()

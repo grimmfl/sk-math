@@ -8,10 +8,14 @@ func int fibonacci(int n) {
     }
 }
 
-bool[] a
+func int[5] test() {
+    return [1, 2, 3, 4, 5]
+}
+
+bool[2] a
 a = [false, true]
 out a
 
 out fibonacci(10)
-
+out test()
 out !(((-1) * (3 + 4)) ^ 2 % 5 > 10)
