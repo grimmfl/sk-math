@@ -212,7 +212,7 @@ The language is based on the following grammar:
 - FuncParams ::= Ɛ | (Type ID (',' Type ID)*)
 - Body ::= ('\n' Statement)* '\n' (Statement) '\n'
 - SimpleStatement ::= VarDecl | VarAssign | Out | FuncCall | ReturnStatement
-- For Statement ::= 'for' '(' Type ID 'in' Expr ')' '{' Body '}'
+- ForStatement ::= 'for' '(' Type ID 'in' Expr ')' '{' Body '}'
 - IfStatement ::= 'if' '(' Expr ')' '{' Body '}' ElifStatement* (ElseStatement | Ɛ)
 - ElifStatement ::= 'elif' '(' Expr ')' '{' Body '}'
 - ElseStatement ::= 'else' '{' Body '}'
