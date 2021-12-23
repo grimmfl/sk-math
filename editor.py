@@ -1,5 +1,6 @@
 import os
 import time
+import platform
 from string import digits, ascii_letters, punctuation
 from typing import Tuple
 
@@ -91,8 +92,15 @@ class Editor:
             self._move_cursor("right")
         self._print()
 
+    @staticmethod
+    def _clear():
+        if platform.system() == "Windows":
+            os.system("cls")
+        else:
+            os.system("clear")
+
     def _print(self):
-        os.system("cls")
+        self._clear()
         print("F10      Compile code written in editor")
         print("")
         lines = self.text.split("\n")
