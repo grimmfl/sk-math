@@ -24,7 +24,7 @@ class IntToFloat(FunctionDefinition):
         location = (0, 0)
         ident = IdentifierReference("x", location)
         ident.set_type(IntType())
-        custom_expr = CustomExpression(ident, lambda x: float(x), location)
+        custom_expr = CustomUnaryFunction(ident, lambda x: float(x), location)
         custom_expr.set_type(FloatType())
         ret = ReturnStatement(custom_expr, location)
         ret.set_return_type(FloatType())
@@ -39,7 +39,7 @@ class FloatToInt(FunctionDefinition):
         location = (0, 0)
         ident = IdentifierReference("x", location)
         ident.set_type(FloatType())
-        custom_expr = CustomExpression(ident, lambda x: int(round(x)), location)
+        custom_expr = CustomUnaryFunction(ident, lambda x: int(round(x)), location)
         custom_expr.set_type(IntType())
         ret = ReturnStatement(custom_expr, location)
         ret.set_return_type(IntType())
@@ -49,7 +49,28 @@ class FloatToInt(FunctionDefinition):
         table.add_function("floatToInt", self)
 
 
-PREDEFINED_FUNCTIONS = [Sqrt, IntToFloat, FloatToInt]
+class Range(FunctionDefinition):
+    def __init__(self, table: "IdentificationTable"):
+        location = (0, 0)
+        from_id: IdentifierReference = IdentifierReference("from", location)
+        from_id.set_type(IntType())
+        to_id: IdentifierReference = IdentifierReference("to", location)
+        to_id.set_type(IntType())
+        size: Subtraction = Subtraction(to_id, from_id, location)
+        size.set_type(IntType())
+        array_type: Type = ArrayType(IntType(), size)
+        function: Callable[[Any, Any], Any] = lambda x, y: [i for i in range(x, y)]
+        custom_expr: CustomBinaryFunction = CustomBinaryFunction(from_id, to_id, function, location)
+        custom_expr.set_type(array_type)
+        ret = ReturnStatement(custom_expr, location)
+        ret.set_return_type(array_type)
+        formal_parameters = [FormalParameter(IntType(), "from", location), FormalParameter(IntType(), "to", location)]
+        super(Range, self).__init__("range", array_type, formal_parameters, [ret], location)
+
+        table.add_function("range", self)
+
+
+PREDEFINED_FUNCTIONS = [Sqrt, IntToFloat, FloatToInt, Range]
 
 
 from compiler.identification_table import IdentificationTable

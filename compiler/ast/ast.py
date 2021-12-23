@@ -318,14 +318,26 @@ class CallExpression(Expression):
         return executor_instance.execute_call_expression(self)
 
 
-class CustomExpression(Expression):
+class CustomUnaryFunction(Expression):
     def __init__(self, expression: Expression, function: Callable[[Any], Any], location: Tuple[int, int]):
         self.expression: Expression = expression
         self.function: Callable[[Any], Any] = function
         super().__init__(location)
 
     def execute(self, executor_instance: "Executor"):
-        return executor_instance.execute_custom_expression(self)
+        return executor_instance.execute_custom_unary_function(self)
+
+
+class CustomBinaryFunction(Expression):
+    def __init__(self, expression1: Expression, expression2: Expression, function: Callable[[Any, Any], Any],
+                 location: Tuple[int, int]):
+        self.expression1: Expression = expression1
+        self.expression2: Expression = expression2
+        self.function: Callable[[Any, Any], Any] = function
+        super().__init__(location)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_custom_binary_function(self)
 
 
 class SimpleStatement(Statement):

@@ -145,9 +145,14 @@ class Executor:
             if isinstance(statement, ReturnStatement) or value is not None:
                 return value
 
-    def execute_custom_expression(self, expression: "CustomExpression"):
+    def execute_custom_unary_function(self, expression: "CustomUnaryFunction"):
         value: PYTHON_PRIMITIVE_TYPE = expression.expression.execute(self)
         return expression.function(value)
+
+    def execute_custom_binary_function(self, expression: "CustomBinaryFunction"):
+        value1: PYTHON_PRIMITIVE_TYPE = expression.expression1.execute(self)
+        value2: PYTHON_PRIMITIVE_TYPE = expression.expression2.execute(self)
+        return expression.function(value1, value2)
 
     def execute_variable_declaration(self, declaration: "VariableDeclaration"):
         value = None
