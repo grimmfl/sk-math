@@ -118,6 +118,13 @@ For Statements are used like this:
 
 The body needs to start with ```{``` followed by a newline and end with a newline followed by ```}```.
 
+You can also create a classic for loop, by using the predefined ```range``` function:
+```
+for (int i in range(0, 10) {
+    out i
+}
+```
+
 #### Variable Declaration
 - Single Variable Declaration: ```int x```
 - Multiple Variable Declaration: ```float x, y, z```
@@ -180,6 +187,8 @@ The following functions are already implemented:
 ```func float intToFloat(int x)``` casts an integer to a float
 
 ```func int floatToInt(float x)``` casts a float to an integer
+
+```func int[] range(int from, int to)``` returns an int[to - from] filled with all numbers from to to
 
 #### Function Calls
 Function calls can be used as statements:
