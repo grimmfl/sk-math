@@ -32,6 +32,7 @@ The language currently supports the following operations:
 - Variable Declarations and Assignments
 - Function Definitions and Calls
 - If Statements
+- For Loops
 - Outputs
 
 ## Documentation
@@ -45,6 +46,7 @@ A statement can be one of the following:
 - Function Call
 - Output
 - If Statements
+- For Loops
 
 A new line ends a statement and starts a new one
 
@@ -98,6 +100,23 @@ If Statements can have multiple ```elif``` blocks and one ```else``` block. The 
 The body needs to start with ```{``` followed by a newline and end with a newline followed by ```}```.
 
 If Statements can be nested.
+
+#### For Loops
+```
+int[5] a
+a = [1, 2, 3, 4, 5]
+for (int i in a) {
+    out i * 3
+}
+```
+
+For Statements are used like this:
+1. Choose the type of the iterator element: ```int```
+2. Choose a name for the iterator element: ```i```
+3. ```in``` keyword
+4. Reference the array you want to iterate over. The element type of the array has to be the same as the chosen element type: ```a```
+
+The body needs to start with ```{``` followed by a newline and end with a newline followed by ```}```.
 
 #### Variable Declaration
 - Single Variable Declaration: ```int x```
@@ -187,12 +206,13 @@ I use a simple LL(2) Top-Down-Parser.
 The language is based on the following grammar:
 
 - Language ::= Statement ( '\n' Statement )*
-- Statement ::= SimpleStatement | FuncDefinition | IfStatement
+- Statement ::= SimpleStatement | FuncDefinition | IfStatement | ForStatement
 - FuncDefinition ::= 'func' ('void' | Type) ID '(' FuncParams ')' '{' Body '}'
 - FuncCall ::= ID '(' FuncParams ')'
 - FuncParams ::= Ɛ | (Type ID (',' Type ID)*)
 - Body ::= ('\n' Statement)* '\n' (Statement) '\n'
 - SimpleStatement ::= VarDecl | VarAssign | Out | FuncCall | ReturnStatement
+- For Statement ::= 'for' '(' Type ID 'in' Expr ')' '{' Body '}'
 - IfStatement ::= 'if' '(' Expr ')' '{' Body '}' ElifStatement* (ElseStatement | Ɛ)
 - ElifStatement ::= 'elif' '(' Expr ')' '{' Body '}'
 - ElseStatement ::= 'else' '{' Body '}'

@@ -39,3 +39,5 @@ class Token(Enum):
     IF = "if"
     ELIF = "elif"
     ELSE = "else"
+    FOR = "for"
+    IN = "in"

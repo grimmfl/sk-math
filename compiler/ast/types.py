@@ -34,6 +34,11 @@ class Type(ReturnType):
 
     def __eq__(self, other):
         return isinstance(other, Type) and other.name == self.name
+    
+
+class Any(Type):
+    def __init__(self):
+        super(Any, self).__init__("any", Any)
 
 
 class PrimitiveType(Type):
@@ -63,7 +68,7 @@ class ArrayType(Type):
         super(ArrayType, self).__init__("array", list)
 
     def __eq__(self, other) -> bool:
-        return isinstance(other, ArrayType) and self.element_type == other.element_type
+        return isinstance(other, ArrayType) and self.element_type == other.element_type 
 
     def __str__(self) -> str:
         return str(self.element_type) + "[]"

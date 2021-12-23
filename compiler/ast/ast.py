@@ -333,6 +333,22 @@ class SimpleStatement(Statement):
         super().__init__(location)
 
 
+class ForStatement(Statement):
+    def __init__(self, element_type: "Type", element_name: str, array: Expression, body: List[Statement],
+                 location: Tuple[int, int]):
+        self.type: "Type" = element_type
+        self.element_name: str = element_name
+        self.array: Expression = array
+        self.body: List[Statement] = body
+        super().__init__(location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_for_statement(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_for_statement(self)
+
+
 class IfStatement(Statement):
     def __init__(self, condition: Expression, body: List[Statement], elifs: List["IfStatement"],
                  else_body: List[Statement], location: Tuple[int, int]):
