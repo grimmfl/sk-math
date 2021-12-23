@@ -195,6 +195,17 @@ class Visitor:
         for statement in if_statement.else_body:
             statement.visit(self)
 
+    def visit_for_statement(self, for_statement: "ForStatement"):
+        array_type: Type = for_statement.array.visit(self)
+        if isinstance(array_type, ArrayType):
+            self._check_type(for_statement, array_type.element_type, for_statement.type)
+            self._table.add_identifier(for_statement.element_name, for_statement, for_statement)
+            for statement in for_statement.body:
+                statement.visit(self)
+            self._table.delete_identifier(for_statement.element_name)
+        else:
+            raise TypeError(for_statement.array, ArrayType(Any, Constant(0, (0, 0))), array_type)
+
     def visit_variable_declaration(self, declaration: "VariableDeclaration"):
         for identifier in declaration.identifiers:
             self._table.add_identifier(identifier, declaration, declaration)

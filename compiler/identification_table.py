@@ -35,6 +35,10 @@ class IdentificationTable(Generic[T]):
             raise IdentifierNotAssignedError(identifier, node)
         return self._identifiers[identifier].peak()
 
+    def delete_identifier(self, identifier: str):
+        self._identifiers.pop(identifier)
+        self._scopes.peak().remove(identifier)
+
     def open_scope(self):
         self._scopes.push([])
 

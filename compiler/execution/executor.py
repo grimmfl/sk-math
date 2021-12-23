@@ -115,6 +115,15 @@ class Executor:
         else:
             return self._execute_body(if_statement.else_body)
 
+    def execute_for_statement(self, for_statement: "ForStatement"):
+        array: List = for_statement.array.execute(self)
+        self._table.add_identifier(for_statement.element_name, None, for_statement)
+        for element in array:
+            self._table.update_identifier(for_statement.element_name, element, for_statement)
+            for statement in for_statement.body:
+                statement.execute(self)
+        self._table.delete_identifier(for_statement.element_name)
+
     def execute_call_expression(self, call: "CallExpression"):
         self._table.open_scope()
         definition: "FunctionDefinition" = call.get_function_definition()
