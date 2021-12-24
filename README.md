@@ -71,7 +71,7 @@ An expression can be one of the following:
 You can use parentheses to work around those precedences.
 
 #### If Statements
-```
+```java
 if (x < 5) {
     int y = 3 + 2
     z = y * 7
@@ -82,7 +82,7 @@ The condition needs to be of type ```bool```.
 
 The body needs to start with ```{``` followed by a newline and end with a newline followed by ```}```.
 
-```
+```java
 if (x < 5) {
     int y = 3 + 2
     z = y * 7
@@ -102,7 +102,7 @@ The body needs to start with ```{``` followed by a newline and end with a newlin
 If Statements can be nested.
 
 #### For Loops
-```
+```java
 int[5] a
 a = [1, 2, 3, 4, 5]
 for (int i in a) {
@@ -155,9 +155,9 @@ There are different kinds of assignments:
 
 
 #### Function Definition
-```
+```java
 func int foo(int x, int y, int z) {
-  var a = x + y
+  int a = x + y
   return a * z
 }
 ```
@@ -174,7 +174,7 @@ If a function has a return type, it needs to return a value of that type.
 
 If your functions does not return anything, you can use ```void``` as the return type:
 
-```
+```java
 func void bar(int x) {
     out x + 5
 }
@@ -195,18 +195,26 @@ The following functions are already implemented:
 #### Function Calls
 Function calls can be used as statements:
 
-```foo(1, y, 3)```
+```java
+foo(1, y, 3)
+```
 
 or  as expressions:
 
-```x = foo(1, y, 3) + z```
+```java
+x = foo(1, y, 3) + z
+```
 
 The actual parameters can be expressions and need to match the formal parameters of the function definition in count and type.
 
 #### Outputs
-```out 5```
+```java
+out 5
+```
 
-```out 7 + bar(1) * a```
+```java
+out 7 + bar(1) * a
+```
 
 Outputs always need to be an expression.
 
