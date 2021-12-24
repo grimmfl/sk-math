@@ -165,7 +165,7 @@ class Executor:
         if isinstance(declaration.type, ArrayType):
             size: int = declaration.type.size.execute(self)
             if size < 0:
-                raise NegativeArraySizeError(size, declaration)
+                raise NegativeArraySizeError(size, declaration.type.size)
             none_array: list = [None for x in range(0, size)]
             value = none_array
         for identifier in declaration.identifiers:
@@ -185,7 +185,7 @@ class Executor:
         array: list = self._table.get_identifier(assignment.identifier, assignment)
         index: int = assignment.index.execute(self)
         if index < 0 or index >= len(array):
-            raise ArrayIndexOutOfBoundsError
+            raise ArrayIndexOutOfBoundsError(index, assignment.index)
         value: PYTHON_PRIMITIVE_TYPE = assignment.value.execute(self)
         array[index] = value
         self._table.update_identifier(assignment.identifier, array, assignment)

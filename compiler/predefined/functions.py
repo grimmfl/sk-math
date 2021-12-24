@@ -59,7 +59,7 @@ class Range(FunctionDefinition):
         size: Subtraction = Subtraction(to_id, from_id, location)
         size.set_type(IntType())
         array_type: Type = ArrayType(IntType(), size)
-        function: Callable[[Any, Any], Any] = lambda x, y: [i for i in range(x, y)]
+        function: Callable[[AnyType, AnyType], AnyType] = lambda x, y: [i for i in range(x, y)]
         custom_expr: CustomBinaryFunction = CustomBinaryFunction(from_id, to_id, function, location)
         custom_expr.set_type(array_type)
         ret = ReturnStatement(custom_expr, location)

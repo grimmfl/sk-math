@@ -334,7 +334,7 @@ class CallExpression(Expression):
 class CustomUnaryFunction(Expression):
     def __init__(self, expression: Expression, function: Callable[[Any], Any], location: Tuple[int, int]):
         self.expression: Expression = expression
-        self.function: Callable[[Any], Any] = function
+        self.function: Callable[[AnyType], AnyType] = function
         super().__init__(location)
 
     def execute(self, executor_instance: "Executor"):
@@ -346,7 +346,7 @@ class CustomBinaryFunction(Expression):
                  location: Tuple[int, int]):
         self.expression1: Expression = expression1
         self.expression2: Expression = expression2
-        self.function: Callable[[Any, Any], Any] = function
+        self.function: Callable[[AnyType, AnyType], AnyType] = function
         super().__init__(location)
 
     def execute(self, executor_instance: "Executor"):
