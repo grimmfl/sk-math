@@ -95,10 +95,6 @@ class Executor:
         array: list = self._table.get_identifier(selection.identifier, selection)
         from_index: int = 0 if selection.from_index is None else selection.from_index.execute(self)
         to_index: int = len(array) if selection.to_index is None else selection.to_index.execute(self)
-        if from_index < 0 or from_index >= len(array):
-            raise ArrayIndexOutOfBoundsError(from_index, selection.from_index)
-        if to_index < 0 or to_index >= len(array):
-            raise ArrayIndexOutOfBoundsError(to_index, selection.to_index)
         return array[from_index:to_index]
 
     def execute_array(self, array: "Array"):
