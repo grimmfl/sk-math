@@ -149,8 +149,10 @@ There are different kinds of assignments:
 - Array Assignment: ```testArray1 = [1, 2, 3, 4]```
 - Element Assignment: ```testArray2[0] = 10```
 
-You can also use array elements in an expression: ```testArray1[2] + 25```
-Or you can use the whole array as an expression: ```out testArray1```
+- You can also use array elements in an expression: ```testArray1[2] + 25```
+- Or you can use the whole array as an expression: ```out testArray1```
+- You can also select a sub array from an array: ```a[3:]```, ```a[:2]```, ```a[3:5]``` (from inclusive, to exclusive)
+
 
 #### Function Definition
 ```
@@ -188,7 +190,7 @@ The following functions are already implemented:
 
 ```func int floatToInt(float x)``` casts a float to an integer
 
-```func int[] range(int from, int to)``` returns an int[to - from] filled with all numbers from to to
+```func int[] range(int from, int to)``` returns an int[to - from] filled with from ```from``` to ```to```
 
 #### Function Calls
 Function calls can be used as statements:
@@ -239,6 +241,7 @@ The language is based on the following grammar:
 - MulDiv ::= Exponentiation ( ( '\*' | '/' ) Exponentiation )*
 - Exponentiation ::= Atom ( '^' Atom )*
 - Type ::= ('int' | 'float' | 'bool') (Ɛ | '\[' Expr '\]')
-- Atom ::= INT | FLOAT | ID | FuncCall | 'true' | 'false'
+- Atom ::= INT | FLOAT | ID | FuncCall | 'true' | 'false' | Array | ArrayElementSelection 
 - Array ::= '\[' (Ɛ | (Expr (',' Expr)*)) '\]'
-- ArrayElementSelection ::= ID '\[' Expr '\]'
+- ArrayElementSelection ::= ID '\[' (Expr | ArraySubSelection) '\]'
+- ArraySubSelection ::= (Expr ':') | (':' Expr) | (Expr ':' Expr)

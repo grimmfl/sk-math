@@ -35,6 +35,7 @@ class Token(Enum):
     RSQBR = "]"
     LBRACE = "{"
     RBRACE = "}"
+    COLLON = ":"
     RETURN = "return"
     IF = "if"
     ELIF = "elif"

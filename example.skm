@@ -11,3 +11,7 @@ func int fibonacci(int n) {
 for (int i in range(1, 6)) {
     out fibonacci(i + 5)
 }
+
+int[10] a
+a = range(0, 10)
+out a[:5]

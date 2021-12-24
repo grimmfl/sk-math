@@ -125,8 +125,21 @@ class Visitor:
     def visit_array_element_selection(self, selection: "ArrayElementSelection") -> "Type":
         self._check_type(selection, IntType(), selection.index.visit(self))
         type: Type = self._table.get_identifier(selection.identifier, selection).type
-        selection.set_type(type)
-        return type
+        if isinstance(type, ArrayType):
+            selection.set_type(type.element_type)
+            return type.element_type
+        raise TypeError(selection, ArrayType(Any(), Constant(0, selection.location)), type)
+
+    def visit_array_sub_selection(self, selection: "ArraySubSelection") -> "Type":
+        if selection.from_index is not None:
+            self._check_type(selection, IntType(), selection.from_index.visit(self))
+        if selection.to_index is not None:
+            self._check_type(selection, IntType(), selection.to_index.visit(self))
+        type: Type = self._table.get_identifier(selection.identifier, selection).type
+        if isinstance(type, ArrayType):
+            selection.set_type(type)
+            return type
+        raise TypeError(selection, ArrayType(Any(), Constant(0, selection.location)), type)
 
     def visit_array(self, array: "Array") -> "Type":
         element_type: Type = None

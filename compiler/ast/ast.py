@@ -240,6 +240,19 @@ class ArrayElementSelection(IdentifierReference):
         return executor_instance.execute_array_element_selection(self)
 
 
+class ArraySubSelection(IdentifierReference):
+    def __init__(self, identifier: str, from_index: Expression, to_index: Expression, location: Tuple[int, int]):
+        self.from_index: Expression = from_index
+        self.to_index: Expression = to_index
+        super().__init__(identifier, location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_array_sub_selection(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_array_sub_selection(self)
+
+
 class Array(Expression):
     def __init__(self, elements: List[Expression], location: Tuple[int, int]):
         self.elements: List[Expression] = elements

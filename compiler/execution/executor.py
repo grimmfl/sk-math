@@ -88,8 +88,18 @@ class Executor:
         array: list = self._table.get_identifier(selection.identifier, selection)
         index: int = selection.index.execute(self)
         if index < 0 or index >= len(array):
-            raise ArrayIndexOutOfBoundsError
+            raise ArrayIndexOutOfBoundsError(index, selection.index)
         return array[index]
+
+    def execute_array_sub_selection(self, selection: "ArraySubSelection"):
+        array: list = self._table.get_identifier(selection.identifier, selection)
+        from_index: int = 0 if selection.from_index is None else selection.from_index.execute(self)
+        to_index: int = len(array) if selection.to_index is None else selection.to_index.execute(self)
+        if from_index < 0 or from_index >= len(array):
+            raise ArrayIndexOutOfBoundsError(from_index, selection.from_index)
+        if to_index < 0 or to_index >= len(array):
+            raise ArrayIndexOutOfBoundsError(to_index, selection.to_index)
+        return array[from_index:to_index]
 
     def execute_array(self, array: "Array"):
         value = []

@@ -410,9 +410,18 @@ class TopDownParser:
         location = self.current_location
         identifier: str = self._parse_name()
         self._accept(Token.LSQBR)
-        count: Expression = self._parse_expression()
+        if self.current_token == Token.COLLON.value or self.next_token == Token.COLLON.value:
+            from_expression, to_expression = None, None
+            if self.current_token != Token.COLLON.value:
+                from_expression: Expression = self._parse_expression()
+            self._accept(Token.COLLON)
+            if self.current_token != Token.RSQBR.value:
+                to_expression: Expression = self._parse_expression()
+            self._accept(Token.RSQBR)
+            return ArraySubSelection(identifier, from_expression, to_expression, location)
+        index: Expression = self._parse_expression()
         self._accept(Token.RSQBR)
-        return ArrayElementSelection(identifier, count, location)
+        return ArrayElementSelection(identifier, index, location)
 
     def _parse_array(self) -> Expression:
         location = self.current_location
