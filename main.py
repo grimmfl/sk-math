@@ -59,6 +59,5 @@ if __name__ == "__main__":
             code = editor.text
             os.system("cls")
             print(code)
-            print("\n>> ", end="")
             run(code)
             input("\nEnter    Write new code")
