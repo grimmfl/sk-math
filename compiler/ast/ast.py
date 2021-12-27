@@ -402,6 +402,20 @@ class ForStatement(Statement):
         return executor_instance.execute_for_statement(self)
 
 
+class WhileStatement(Statement):
+    def __init__(self, condition: Expression, body: List[Statement],
+                 location: Tuple[int, int]):
+        self.condition: Expression = condition
+        self.body: List[Statement] = body
+        super().__init__(location)
+
+    def visit(self, visitor_instance: "Visitor"):
+        return visitor_instance.visit_while_statement(self)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_while_statement(self)
+
+
 class IfStatement(Statement):
     def __init__(self, condition: Expression, body: List[Statement], elifs: List["IfStatement"],
                  else_body: List[Statement], location: Tuple[int, int]):

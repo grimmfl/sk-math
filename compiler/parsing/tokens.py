@@ -42,6 +42,7 @@ class Token(Enum):
     ELSE = "else"
     FOR = "for"
     IN = "in"
+    WHILE = "while"
 
 
 ARITHMETIC_OPERATIONS = [Token.ADD, Token.SUB, Token.MUL, Token.DIV, Token.EXP, Token.MOD]

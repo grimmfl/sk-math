@@ -133,6 +133,11 @@ class Executor:
                 statement.execute(self)
         self._table.delete_identifier(for_statement.element_name)
 
+    def execute_while_statement(self, while_statement: "WhileStatement"):
+        while while_statement.condition.execute(self):
+            for statement in while_statement.body:
+                statement.execute(self)
+
     def execute_call_expression(self, call: "CallExpression"):
         self._table.open_scope()
         definition: "FunctionDefinition" = call.get_function_definition()

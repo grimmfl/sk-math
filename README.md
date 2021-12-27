@@ -101,6 +101,20 @@ The body needs to start with ```{``` followed by a newline and end with a newlin
 
 If Statements can be nested.
 
+#### While Loops
+```java
+int i
+i = 0
+while (i < 10) {
+    out i
+    i = i + 1
+}
+```
+
+The condition needs to be surrounded by parentheses and of type Bool.
+
+The body needs to start with ```{``` followed by a newline and end with a newline followed by ```}```.
+
 #### For Loops
 ```java
 int[5] a
@@ -235,13 +249,16 @@ I use a simple LL(2) Top-Down-Parser.
 The language is based on the following grammar:
 
 - Language ::= Statement ( '\n' Statement )*
-- Statement ::= SimpleStatement | FuncDefinition | IfStatement | ForStatement
+- Statement ::= SimpleStatement | FuncDefinition | IfStatement | ForStatement | WhileStatement
 - FuncDefinition ::= 'func' ('void' | Type) ID '(' FuncParams ')' '{' Body '}'
 - FuncCall ::= ID '(' FuncParams ')'
-- FuncParams ::= Ɛ | (Type ID (',' Type ID)*)
+- FuncParams ::= RequiredParams OptionalParams
+- RequiredParams ::= Ɛ | (Type ID '=' Expr (',' Type ID '=' Expr)*)
+- OptionalParams ::= Ɛ | (Type ID (',' Type ID)*)
 - Body ::= ('\n' Statement)* '\n' (Statement) '\n'
 - SimpleStatement ::= VarDecl | VarAssign | Out | FuncCall | ReturnStatement
 - ForStatement ::= 'for' '(' Type ID 'in' Expr ')' '{' Body '}'
+- WhileStatement ::= 'while' '(' Expr ')' '{' Body '}'
 - IfStatement ::= 'if' '(' Expr ')' '{' Body '}' ElifStatement* (ElseStatement | Ɛ)
 - ElifStatement ::= 'elif' '(' Expr ')' '{' Body '}'
 - ElseStatement ::= 'else' '{' Body '}'

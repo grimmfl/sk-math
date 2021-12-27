@@ -227,7 +227,13 @@ class Visitor:
                 statement.visit(self)
             self._table.delete_identifier(for_statement.element_name)
         else:
-            raise TypeError(for_statement.array, ArrayType(AnyType, Constant(0, (0, 0))), array_type)
+            raise TypeError(for_statement.array, ArrayType(AnyType(), Constant(0, (0, 0))), array_type)
+
+    def visit_while_statement(self, while_statement: "WhileStatement"):
+        condition_type: Type = while_statement.condition.visit(self)
+        self._check_type(while_statement.condition, BoolType(), condition_type)
+        for statement in while_statement.body:
+            statement.visit(self)
 
     def visit_variable_declaration(self, declaration: "VariableDeclaration"):
         for identifier in declaration.identifiers:

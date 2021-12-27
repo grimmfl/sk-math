@@ -108,7 +108,8 @@ class TopDownParser:
             Token.OUT.value: self._parse_out_statement,
             Token.RETURN.value: self._parse_return_statement,
             Token.IF.value: self._parse_if_statement,
-            Token.FOR.value: self._parse_for_statement
+            Token.FOR.value: self._parse_for_statement,
+            Token.WHILE.value: self._parse_while_statement,
         }
         if self.current_token in switch.keys():
             return switch[self.current_token]()
@@ -158,6 +159,17 @@ class TopDownParser:
         body: List[Statement] = self._parse_body()
         self._accept(Token.RBRACE)
         return ForStatement(element_type, element_name, array, body, location)
+
+    def _parse_while_statement(self) -> Statement:
+        location = self.current_location
+        self._accept(Token.WHILE)
+        self._accept(Token.LPAREN)
+        condition: Expression = self._parse_expression()
+        self._accept(Token.RPAREN)
+        self._accept(Token.LBRACE)
+        body: List[Statement] = self._parse_body()
+        self._accept(Token.RBRACE)
+        return WhileStatement(condition, body, location)
 
     def _parse_return_statement(self) -> ReturnStatement:
         location = self.current_location
