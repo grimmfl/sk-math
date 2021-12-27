@@ -12,6 +12,12 @@ for (int i in range(1, 6)) {
     out fibonacci(i + 5)
 }
 
-int[10] a
-a = range(0, 10)
-out a[5:]
+int[4] a
+a = range(0, 10, 3)
+out a
+
+func int foo(int i, int j = 1) {
+    return (i + 5) * j
+}
+
+out foo(5, 2)

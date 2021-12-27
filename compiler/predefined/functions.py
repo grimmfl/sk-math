@@ -16,6 +16,7 @@ class Sqrt(FunctionDefinition):
         formal_parameters = [FormalParameter(FloatType(), "x", location)]
         super(Sqrt, self).__init__("sqrt", FloatType(), formal_parameters, [ret], location)
 
+        self.set_required_count(1)
         table.add_function("sqrt", self)
 
 
@@ -31,6 +32,7 @@ class IntToFloat(FunctionDefinition):
         formal_parameters = [FormalParameter(IntType(), "x", location)]
         super(IntToFloat, self).__init__("intToFloat", FloatType(), formal_parameters, [ret], location)
 
+        self.set_required_count(1)
         table.add_function("intToFloat", self)
 
 
@@ -46,6 +48,7 @@ class FloatToInt(FunctionDefinition):
         formal_parameters = [FormalParameter(FloatType(), "x", location)]
         super(FloatToInt, self).__init__("floatToInt", IntType(), formal_parameters, [ret], location)
 
+        self.set_required_count(1)
         table.add_function("floatToInt", self)
 
 
@@ -56,17 +59,25 @@ class Range(FunctionDefinition):
         from_id.set_type(IntType())
         to_id: IdentifierReference = IdentifierReference("to", location)
         to_id.set_type(IntType())
-        size: Subtraction = Subtraction(to_id, from_id, location)
+        step_id: IdentifierReference = IdentifierReference("step", location)
+        step_id.set_type(IntType())
+        size_fn: Callable[[Any, Any, Any], Any] = lambda x, y, z: int((y - x) / z) if (y - x) % z == 0 else int((y - x) / z) + 1
+        size: CustomTernaryFunction = CustomTernaryFunction(from_id, to_id, step_id, size_fn, location)
         size.set_type(IntType())
         array_type: Type = ArrayType(IntType(), size)
-        function: Callable[[AnyType, AnyType], AnyType] = lambda x, y: [i for i in range(x, y)]
-        custom_expr: CustomBinaryFunction = CustomBinaryFunction(from_id, to_id, function, location)
+        function: Callable[[Any, Any, Any], Any] = lambda x, y, z: [i for i in range(x, y, z)]
+        custom_expr: CustomTernaryFunction = CustomTernaryFunction(from_id, to_id, step_id, function, location)
         custom_expr.set_type(array_type)
         ret = ReturnStatement(custom_expr, location)
         ret.set_return_type(array_type)
-        formal_parameters = [FormalParameter(IntType(), "from", location), FormalParameter(IntType(), "to", location)]
+        formal_parameters = [
+            FormalParameter(IntType(), "from", location),
+            FormalParameter(IntType(), "to", location),
+            FormalParameterWithDefault(IntType(), "step", Constant(1, location), location)
+        ]
         super(Range, self).__init__("range", array_type, formal_parameters, [ret], location)
 
+        self.set_required_count(2)
         table.add_function("range", self)
 
 

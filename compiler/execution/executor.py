@@ -58,7 +58,7 @@ class Executor:
         p_type: PythonType = division.get_type().python_type
         left_op: p_type = division.left_operand.execute(self)
         right_op: p_type = division.right_operand.execute(self)
-        return left_op / right_op
+        return left_op / right_op if isinstance(division.get_type(), FloatType) else int(left_op / right_op)
 
     def execute_modulo(self, modulo: "Modulo"):
         p_type: PythonType = modulo.get_type().python_type
@@ -107,7 +107,10 @@ class Executor:
         return constant.value
 
     def execute_formal_parameter(self, parameter: "FormalParameter"):
-        self._table.add_identifier(parameter.identifier, None, parameter)
+        value = None
+        if isinstance(parameter, FormalParameterWithDefault):
+            value = parameter.default_value.execute(self)
+        self._table.add_identifier(parameter.identifier, value, parameter)
 
     def execute_function_definition(self, definition: "FunctionDefinition"):
         self._table.add_function(definition.name, definition)
@@ -133,10 +136,12 @@ class Executor:
     def execute_call_expression(self, call: "CallExpression"):
         self._table.open_scope()
         definition: "FunctionDefinition" = call.get_function_definition()
-        for i in range(0, len(call.actual_parameters)):
+        for i in range(0, len(call.actual_parameters)):  # actual parameters
             identifier: str = definition.formal_parameters[i].identifier
             value: PYTHON_PRIMITIVE_TYPE = call.actual_parameters[i].execute(self)
             self._table.add_identifier(identifier, value, call)
+        for i in range(len(call.actual_parameters), len(definition.formal_parameters)):  # default values
+            definition.formal_parameters[i].execute(self)
         return_value = self._execute_body(definition.body)
         if isinstance(definition.return_type, ArrayType):
             formal_size: int = definition.return_type.size.execute(self)
@@ -159,6 +164,12 @@ class Executor:
         value1: PYTHON_PRIMITIVE_TYPE = expression.expression1.execute(self)
         value2: PYTHON_PRIMITIVE_TYPE = expression.expression2.execute(self)
         return expression.function(value1, value2)
+
+    def execute_custom_ternary_function(self, expression: "CustomTernaryFunction"):
+        value1: PYTHON_PRIMITIVE_TYPE = expression.expression1.execute(self)
+        value2: PYTHON_PRIMITIVE_TYPE = expression.expression2.execute(self)
+        value3: PYTHON_PRIMITIVE_TYPE = expression.expression3.execute(self)
+        return expression.function(value1, value2, value3)
 
     def execute_variable_declaration(self, declaration: "VariableDeclaration"):
         value = None

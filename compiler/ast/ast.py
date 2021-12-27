@@ -290,6 +290,12 @@ class FormalParameter(AstNode):
         return executor_instance.execute_formal_parameter(self)
 
 
+class FormalParameterWithDefault(FormalParameter):
+    def __init__(self, type: "Type", identifier: str, default_value: Expression, location: Tuple[int, int]):
+        self.default_value: Expression = default_value
+        super().__init__(type, identifier, location)
+
+
 class FunctionDefinition(Statement):
     def __init__(self, name: str, return_type: "ReturnType", formal_parameters: List[FormalParameter],
                  body: List[Statement],
@@ -299,6 +305,14 @@ class FunctionDefinition(Statement):
         self.formal_parameters: List[FormalParameter] = formal_parameters
         self.body: List[Statement] = body
         super().__init__(location)
+
+        self._required_count: int = None
+
+    def set_required_count(self, count: int):
+        self._required_count = count
+
+    def get_required_count(self) -> int:
+        return self._required_count
 
     def visit(self, visitor_instance: "Visitor"):
         return visitor_instance.visit_function_definition(self)
@@ -351,6 +365,20 @@ class CustomBinaryFunction(Expression):
 
     def execute(self, executor_instance: "Executor"):
         return executor_instance.execute_custom_binary_function(self)
+
+
+class CustomTernaryFunction(Expression):
+    def __init__(self, expression1: Expression, expression2: Expression, expression3: Expression,
+                 function: Callable[[Any, Any, Any], Any],
+                 location: Tuple[int, int]):
+        self.expression1: Expression = expression1
+        self.expression2: Expression = expression2
+        self.expression3: Expression = expression3
+        self.function: Callable[[Any, Any, Any], Any] = function
+        super().__init__(location)
+
+    def execute(self, executor_instance: "Executor"):
+        return executor_instance.execute_custom_ternary_function(self)
 
 
 class SimpleStatement(Statement):

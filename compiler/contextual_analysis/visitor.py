@@ -163,9 +163,11 @@ class Visitor:
 
     def visit_call_expression(self, expression: "CallExpression") -> "Type":
         definition: FunctionDefinition = self._table.get_function(expression.name, expression)
-        if len(expression.actual_parameters) != len(definition.formal_parameters):
+        if len(expression.actual_parameters) < definition.get_required_count():
+            raise ArgumentCountError(definition.get_required_count(), len(expression.actual_parameters), expression)
+        if len(expression.actual_parameters) > len(definition.formal_parameters):
             raise ArgumentCountError(len(definition.formal_parameters), len(expression.actual_parameters), expression)
-        for i in range(0, len(definition.formal_parameters)):
+        for i in range(0, len(expression.actual_parameters)):
             formal_type: Type = definition.formal_parameters[i].type
             actual_type: Type = expression.actual_parameters[i].visit(self)
             self._check_type(expression.actual_parameters[i], formal_type, actual_type)
@@ -175,14 +177,22 @@ class Visitor:
         return type
 
     def visit_formal_parameter(self, formal_parameter: "FormalParameter"):
+        if isinstance(formal_parameter, FormalParameterWithDefault):
+            value_type: Type = formal_parameter.default_value.visit(self)
+            self._check_type(formal_parameter, formal_parameter.type, value_type)
         self._table.add_identifier(formal_parameter.identifier, formal_parameter, formal_parameter)
 
     def visit_function_definition(self, function_definition: "FunctionDefinition"):
         self._currently_in_function = True
         self._table.add_function(function_definition.name, function_definition)
         self._table.open_scope()
+        required_count: int = 0
         for parameter in function_definition.formal_parameters:
+            if not isinstance(parameter, FormalParameterWithDefault):
+                required_count += 1
             parameter.visit(self)
+        function_definition.set_required_count(required_count)
+        self._table.update_function(function_definition.name, function_definition)
         return_statements: List[ReturnStatement] = []
         for statement in function_definition.body:
             statement.visit(self)

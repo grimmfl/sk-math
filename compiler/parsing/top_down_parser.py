@@ -2,7 +2,7 @@ from string import digits
 
 from compiler.ast.ast import *
 from compiler.errors import SyntaxError
-from compiler.parsing.tokens import Token
+from compiler.parsing.tokens import Token, ARITHMETIC_OPERATION_VALUES
 from helpers import Stack, is_number
 
 OPS = [Token.__dict__.get(t).value for t in filter(lambda x: not x.startswith("_"), Token.__dict__.keys())]
@@ -242,19 +242,41 @@ class TopDownParser:
             self._accept(Token.NEWL)
         return statements
 
+    def _is_current_parameter_optional(self) -> bool:
+        for i in range(self._current_token_idx, len(self.tokens)):
+            if self.tokens[i] == Token.COMMA.value or self.tokens[i] == Token.RPAREN.value:
+                break
+            if self.tokens[i] == Token.ASSIGN.value:
+                return True
+        return False
+
     def _parse_formal_parameters(self) -> List[FormalParameter]:
         parameters: List[FormalParameter] = []
-        while self.current_token != Token.RPAREN.value:
-            parameters.append(self._parse_formal_parameter())
+        while self.current_token != Token.RPAREN.value:  # Required parameters
+            if self._is_current_parameter_optional():
+                break
+            parameters.append(self._parse_required_formal_parameter())
+            if self.current_token != Token.RPAREN.value:
+                self._accept(Token.COMMA)
+        while self.current_token != Token.RPAREN.value:  # Optional parameters
+            parameters.append(self._parse_optional_formal_parameter())
             if self.current_token != Token.RPAREN.value:
                 self._accept(Token.COMMA)
         return parameters
 
-    def _parse_formal_parameter(self) -> FormalParameter:
+    def _parse_required_formal_parameter(self) -> FormalParameter:
         location = self.current_location
         type: Type = self._parse_type()
         name: str = self._parse_name()
         return FormalParameter(type, name, location)
+
+    def _parse_optional_formal_parameter(self) -> FormalParameter:
+        location = self.current_location
+        type: Type = self._parse_type()
+        name: str = self._parse_name()
+        self._accept(Token.ASSIGN)
+        default_value: Expression = self._parse_expression()
+        return FormalParameterWithDefault(type, name, default_value, location)
 
     def _parse_return_type(self) -> ReturnType:
         if self.current_token == Token.VOID.value:
