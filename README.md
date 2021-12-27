@@ -119,7 +119,7 @@ For Statements are used like this:
 The body needs to start with ```{``` followed by a newline and end with a newline followed by ```}```.
 
 You can also create a classic for loop, by using the predefined ```range``` function:
-```
+```java
 for (int i in range(0, 10) {
     out i
 }
