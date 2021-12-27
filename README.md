@@ -180,6 +180,16 @@ func void bar(int x) {
 }
 ```
 
+Functions can also contain optional parameters by defining a default value:
+
+```java
+func void bar(int x, int y = 10) {
+    out x + y
+}
+```
+
+Optional parameters need to be defined after all required parameters.
+
 #### Predefined Functions
 
 The following functions are already implemented:
@@ -190,7 +200,7 @@ The following functions are already implemented:
 
 ```func int floatToInt(float x)``` casts a float to an integer
 
-```func int[] range(int from, int to)``` returns an int[to - from] filled with from ```from``` to ```to```
+```func int[] range(int from, int to, int step = 1)``` returns an int[to - from] filled with from ```from``` to ```to``` with step ```step
 
 #### Function Calls
 Function calls can be used as statements:
