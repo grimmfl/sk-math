@@ -1,6 +1,6 @@
 # sk-math
 
-A simple WIP math language with its own compiler written in Python.
+A simple WIP math language with its own interpreter written in Python.
 
 ## Usage
 | Action                  | Command                         |
